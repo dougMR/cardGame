@@ -273,6 +273,20 @@ body {
 	     1px 1px 0 #000;
 }
 
+.turn-counter {
+	position: absolute;
+	left: 10px;
+	top: 180px;
+	border: 1px solid brown;
+	box-shadow: 0 0 10px black;
+	box-sizing: border-box;
+	padding: 0.5em;
+	font-size: 1em;
+	color: white;
+	font-family: sans-serif;
+	text-align: center;
+}
+
 </style>
 
 </head>
@@ -332,6 +346,10 @@ let Game = (function(namespace){
 
 	let AICardGrid = document.getElementById("ai-cards");
 	$(AICardGrid).css({width: cardWidth*4 +30, height: cardHeight*4 +30});
+
+	let turnCountField = document.createElement("span");
+	$(turnCountField).addClass("turn-counter");
+	gameContainer.appendChild(turnCountField);
 
 	let computerPlayer, livePlayer;
 
@@ -500,6 +518,7 @@ let Game = (function(namespace){
 			this.cost = cost;
 			this.elementIndex = ele;
 			this._slot = null;
+			this._turnCreated = Game.turnNum;
 			// 
 			let evt = isTouch ? 'touchend' : 'click';
 			$(this.el).on( evt, () => {
@@ -803,6 +822,10 @@ let Game = (function(namespace){
 				this._type = value;
 			}
 		}
+
+		get turnCreated () {
+			return this._turnCreated;
+		}
 	}
 
 	// -- End Card Constructor
@@ -832,7 +855,7 @@ let Game = (function(namespace){
 			super( _el );
 			this._size = 110;
 			this._el = _el;
-			this.name = name;	
+			this._name = name;	
 			this.portraitSrc = portraitSrc != undefined ? portraitSrc : "player_default.gif";
 			this.init();
 			this.assemble();
@@ -880,16 +903,7 @@ let Game = (function(namespace){
 			this._el.appendChild( this.nameField );
 			this.nameField.textContent = this.name;
 		}
-		// getters & setters
-		set hp ( value ) {
-		 	if ( value != undefined ) {
-		 		this._hp = value;
-		 		this.hpField.textContent = value;
-		 	}
-		 }
-		get hp () {
-			return this._hp;
-		}
+		
 		takeDamage( value ) {
 			console.log("Player.takeDamage( "+value+" )");
 			this.hp =  this.hp - value;
@@ -923,6 +937,19 @@ let Game = (function(namespace){
 			if ( index === Number.parseInt( index, 10 ) && typeof value === "number" ) {
 				this.setElement( index, this.getElement( index ) + value );
 			}
+		}
+		// getters & setters
+		get name () {
+			return this._name;
+		}
+		set hp ( value ) {
+		 	if ( value != undefined ) {
+		 		this._hp = value;
+		 		this.hpField.textContent = value;
+		 	}
+		 }
+		get hp () {
+			return this._hp;
 		}
 		get elementValues () {
 			return this._elementValues.slice(0);;
@@ -1341,6 +1368,7 @@ let Game = (function(namespace){
 	Game.activePlayer = null;
 	Game.passivePlayer = null;
 	Game.selectedCard = null;
+	Game.gameOver = false;
 
 	Game.initGame = function() {
 		console.log("Game.initGame()");
@@ -1391,12 +1419,13 @@ let Game = (function(namespace){
 	}
 	Game.startTurn = function () {
 		console.log("Game.startTurn()");
+		if ( Game.gameOver ) return;
 		Game.turnNum ++;
 		console.log( "Turn "+Game.turnNum );
 		console.log("---------------------------------");
 		console.log("\r\n");
 		
-		
+		$(turnCountField).html("Turn <br />"+Game.turnNum);
 		Game.turnPhase = 0;
 		Game.startPhase();
 	}
@@ -1404,7 +1433,7 @@ let Game = (function(namespace){
 		console.log("Game.startPhase()");
 		console.log("Game.turnPhase: "+Game.turnPhase);
 		console.log("---------------------------------");
-
+		if ( Game.gameOver ) return;
 		Game.selectedCard = null;
 		Game.activePlayer = Game.turnPhase === 0 ? livePlayer : computerPlayer;
 		Game.passivePlayer = Game.activePlayer === livePlayer ? computerPlayer : livePlayer;
@@ -1429,6 +1458,7 @@ let Game = (function(namespace){
 	}
 	Game.endPhase = function () {
 		console.log("Game.endPhase()");
+		if ( Game.gameOver ) return;
 		// Handle non-attack effects for each card
 		// ...
 		// Damage host 
@@ -1458,7 +1488,29 @@ let Game = (function(namespace){
 		Game.startTurn();
 	}
 
+	Game.endGame = function () {
+		console.log("Game.endGame()");
+		Game.gameOver = true;
+		// Lock both decks
+		Game.activePlayer.deck.lock();
+		Game.passivePlayer.deck.lock();
+		// Announce winner
+		let winner, loser;
+		if ( livePlayer.hp <= 0 ) {
+			winner = computerPlayer;
+			loser = livePlayer;
+		} else if ( computerPlayer.hp <= 0 ) {
+			winner = livePlayer;
+			loser = computerPlayer;
+		}
+		alert ( winner.name+" has defeated "+loser.name+" in "+Game.turnNum+" turns!" );
+	}
 
+	Game.checkGameOver = function () {
+		if ( livePlayer.hp <= 0 || computerPlayer.hp <= 0 ) {
+			Game.endGame();
+		}
+	}
 
 	
 	Game.unlockPlayableCards = function ( player ) {
@@ -1581,7 +1633,7 @@ let Game = (function(namespace){
 		// Temp - just attack opponenet w/ card's attack value
 		console.log("card.attack: "+card.attack);
 		Game.passivePlayer.takeDamage( card.attack );
-
+		Game.checkGameOver();
 
 		// Game.resolveAttacks();
 
@@ -1611,8 +1663,6 @@ let Game = (function(namespace){
 		dupCard.undim();
 
 		Game.activePlayer.rack.putCardInSlot( dupCard, slot );
-
-		// Game.resolveAttacks();
 		
 	}
 
@@ -1636,7 +1686,8 @@ let Game = (function(namespace){
 		for ( let s = 0; s < Game.activePlayer.rack.slots.length; s++ ) {
 			// Check each slot for a card
 			let card = Game.activePlayer.rack.slots[s].card;
-			if ( card != undefined ) {
+			if ( card != undefined && card.turnCreated < Game.turnNum ) {
+				// Cards by default can't attack on the same turn that they are played
 				slotIndexes.push( s );
 			}
 		}
@@ -1645,14 +1696,14 @@ let Game = (function(namespace){
 			let si = 0;
 			let attackWait = setInterval( function() {
 				console.log("Game.resolveAttacks(), setInterval");
-				let curplayer = Game.activePlayer == livePlayer ? "Human" : "Computer";
+				// let curplayer = Game.activePlayer == livePlayer ? "Human" : "Computer";
 				// console.log("Player: "+curplayer);
 				// console.log("si vs slotIndexes.length:"+si+" ... "+slotIndexes.length);
 				// execute card's attack
 				Game.cardAttack( slotIndexes[ si ] );
 				si++;
 				
-				if ( si >= slotIndexes.length ) {
+				if ( si >= slotIndexes.length || Game.gameOver ) {
 					clearInterval( attackWait );
 					let wait = setTimeout( Game.endPhase, 1000 );
 				}
@@ -1663,6 +1714,10 @@ let Game = (function(namespace){
 	}
 	Game.cardAttack = function ( slotIndex ) {
 		console.log("Game.cardAttack( "+slotIndex+" )");
+		if ( Game.gameOver ) {
+			return;
+		}
+		console.log("...executing Game.cardAttack()");
 		let card = Game.activePlayer.rack.slots[ slotIndex ].card;
 		let defenderCard = Game.passivePlayer.rack.slots[ slotIndex ].card;
 		// console.log("defenderCard: ");
@@ -1685,6 +1740,7 @@ let Game = (function(namespace){
 	
 			function complete() {
 				console.log("Tween Complete()");
+				
 				if ( defenderCard == undefined ) {
 					// no card, attack goes through to passivePlayer
 					Game.passivePlayer.takeDamage( card.attack );
@@ -1692,6 +1748,10 @@ let Game = (function(namespace){
 					// attack defender's card
 					defenderCard.takeDamage( card.attack );
 				}
+
+				// Is a player defeated?
+				Game.checkGameOver();
+				
 			}
 			
 		}
@@ -1835,7 +1895,13 @@ let Game = (function(namespace){
 		}
 
 		// Of those, randomly pick one
-		let card = cards[ Math.floor( Math.random()*cards.length ) ];
+		// let card = cards[ Math.floor( Math.random()*cards.length ) ];
+		// Pick the most expensive
+		cards.sort( function(a,b) {
+			return b.cost - a.cost;
+		});
+		let card = cards[0];
+		console.log("card.cost: "+card.cost);
 
 		// Display Selected card until Human player acknowledges (clicks)
 		Game.selectCard( card );
