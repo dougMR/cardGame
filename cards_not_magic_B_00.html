@@ -371,7 +371,8 @@ let Game = (function(namespace){
 		set x ( value ) {
 		 	if ( value != undefined ) {
 		 		this._x = value;
-	 			TweenMax.set( this._myEl, {x:value});
+				$(this._myEl).css("left",value);
+	 			// TweenMax.set( this._myEl, {x:value});
 		 	}
 		 }
 		get x () {
@@ -381,7 +382,8 @@ let Game = (function(namespace){
 		set y ( value ) {
 		 	if ( value != undefined ) {
 		 		this._y = value;
-		 		TweenMax.set( this._myEl, {y:value});	
+				$(this._myEl).css("top",value);
+		 		// TweenMax.set( this._myEl, {y:value});	
 		 	} 
 		 }
 		get y () {
@@ -600,7 +602,10 @@ let Game = (function(namespace){
 			console.log("Card.kill()");
 			console.log("mySlot: "+this.mySlot);
 			$(this._shadowEl).remove();
-			this.mySlot.card = null;
+			if ( this.mySlot != undefined ) {
+				this.mySlot.card = null;
+			}
+			
 			super.kill();
 		}
 
@@ -773,7 +778,8 @@ let Game = (function(namespace){
 		set x ( value ) {
 			if ( typeof value === "number" ) {
 				super.x = value;
-				TweenMax.set( this._shadowEl, {x:value});
+				$(this._shadowEl).css("left", value);
+				// TweenMax.set( this._shadowEl, {x:value});
 			}
 		}
 		get x () {
@@ -782,7 +788,8 @@ let Game = (function(namespace){
 		set y ( value ) {
 			if ( typeof value === "number" ) {
 				super.y = value;
-				TweenMax.set( this._shadowEl, {y:value});
+				$(this._shadowEl).css("top", value);
+				// TweenMax.set( this._shadowEl, {y:value});
 			}
 		}
 		get y () {
@@ -1377,12 +1384,8 @@ let Game = (function(namespace){
 
 	Game.startGame = function () {
 		console.log("Game.startGame()");
-		// ***** --- > Start Game
-		// let pos = Game.getElementPosition(playerCardGrid);
-		// livePlayer.deck.x = pos.x;
-		// livePlayer.deck.y = pos.y;
 		livePlayer.deck.flipCards();
-		// wait is magic number, to wait for all the cards to flip over before making them available
+		// wait is magic number, to wait for all the human player's cards to flip over before unlocking them
 		let wait = setTimeout( Game.startTurn, 2500 );
 		
 	}
@@ -1393,26 +1396,36 @@ let Game = (function(namespace){
 		console.log("---------------------------------");
 		console.log("\r\n");
 		
-		Game.selectedCard = null;
+		
 		Game.turnPhase = 0;
 		Game.startPhase();
 	}
 	Game.startPhase = function () {
 		console.log("Game.startPhase()");
 		console.log("Game.turnPhase: "+Game.turnPhase);
-		console.log("---------------------------------")
+		console.log("---------------------------------");
 
+		Game.selectedCard = null;
 		Game.activePlayer = Game.turnPhase === 0 ? livePlayer : computerPlayer;
 		Game.passivePlayer = Game.activePlayer === livePlayer ? computerPlayer : livePlayer;
 		
 		// Add Element points (+1 default)
 		Game.updatePlayerElementPoints();
-
+		Game.unlockPlayableCards( Game.activePlayer );
 		if ( Game.turnPhase === 0 ) {
 			Game.startHumanPhase();
 		} else if ( Game.turnPhase === 1 ) {
 			Game.startAIPhase();
 		}
+	}
+	Game.startHumanPhase = function() {
+		console.log("Game.startHumanPhase()");
+		
+	}
+	Game.startAIPhase = function () {
+		console.log("Game.startAIPhase()");
+		
+		AISelectCard ();		
 	}
 	Game.endPhase = function () {
 		console.log("Game.endPhase()");
@@ -1444,25 +1457,7 @@ let Game = (function(namespace){
 		console.log("=============================\n\r")
 		Game.startTurn();
 	}
-	Game.startHumanPhase = function() {
-		console.log("Game.startHumanPhase()");
-		Game.unlockPlayableCards( livePlayer );
-	}
-	Game.startAIPhase = function () {
-		console.log("Game.startAIPhase()");
-		livePlayer.deck.lock();
-		Game.unlockPlayableCards( computerPlayer );
-		// Select card from AI deck
-		setTimeout( function() {
-			// pause so I can see AI deck unlocked
-			AIPlayCard ();
 
-			computerPlayer.deck.lock();
-			// Game.endPhase();
-			Game.resolveAttacks();
-		}, 1000 );
-		
-	}
 
 
 	
@@ -1496,47 +1491,6 @@ let Game = (function(namespace){
 
 
 
-
-	Game.clickSlot = function ( slot ) {
-		console.log("Game.clickSlot()");
-		/*
-			Slot in a rack has been clicked / touched.  Decide what to do with that...
-		*/
-		// IF HumanPlayer has a card selected,
-
-		if ( Game.selectedCard instanceof Card 
-		// And the slot is empty
-		&& slot.card == undefined ) {
-			// must be creature because it is a selected card ( spells can't be selected )
-			Game.playCreatureCard( Game.selectedCard, slot );
-
-			// Deselect original card
-			Game.selectedCard.deselect();
-
-			livePlayer.deck.lock();
-
-			// Game.endPhase();
-			Game.resolveAttacks();
-		}
-	}
-	Game.duplicateCard = function ( card ) {
-		// Duplicate that card
-		let dupCard = new Card(
-		card.elementIndex,
-		card.attack,
-		card.defense,
-		card.hp,
-		card.cost,
-		card.img,
-		card.title,
-		card.type);
-		// Place face up on top of original card
-		dupCard.x = card.x;
-		dupCard.y = card.y;
-		dupCard.flip( true );
-		
-		return dupCard;
-	}
 	Game.selectCard = function( whichCard ) {
 		console.log("Game.selectCard()");
 		Game.selectedCard = whichCard;
@@ -1578,6 +1532,47 @@ let Game = (function(namespace){
 			}
 		}
 	}
+	Game.clickSlot = function ( slot ) {
+		console.log("Game.clickSlot()");
+		/*
+			Slot in a rack has been clicked / touched.  Decide what to do with that...
+		*/
+		// IF HumanPlayer has a card selected,
+
+		if ( Game.selectedCard instanceof Card 
+		// And the slot is empty
+		&& slot.card == undefined ) {
+			// must be creature because it is a selected card ( spells can't be selected )
+			Game.playCreatureCard( Game.selectedCard, slot );
+
+			// Deselect original card
+			Game.selectedCard.deselect();
+
+			livePlayer.deck.lock();
+
+			// Game.endPhase();
+			Game.resolveAttacks();
+		}
+	}
+	Game.duplicateCard = function ( card ) {
+		// Duplicate that card
+		let dupCard = new Card(
+		card.elementIndex,
+		card.attack,
+		card.defense,
+		card.hp,
+		card.cost,
+		card.img,
+		card.title,
+		card.type);
+		// Place face up on top of original card
+		dupCard.x = card.x;
+		dupCard.y = card.y;
+		dupCard.flip( true );
+		
+		return dupCard;
+	}
+	
 	
 	Game.playSpellCard = function ( card ) {
 		console.log("Game.playSpellCard()");
@@ -1586,6 +1581,8 @@ let Game = (function(namespace){
 		// Temp - just attack opponenet w/ card's attack value
 		console.log("card.attack: "+card.attack);
 		Game.passivePlayer.takeDamage( card.attack );
+
+
 		// Game.resolveAttacks();
 
 		// Does the spell operate automatically?
@@ -1649,8 +1646,8 @@ let Game = (function(namespace){
 			let attackWait = setInterval( function() {
 				console.log("Game.resolveAttacks(), setInterval");
 				let curplayer = Game.activePlayer == livePlayer ? "Human" : "Computer";
-				console.log("Player: "+curplayer);
-				console.log("si vs slotIndexes.length:"+si+" ... "+slotIndexes.length);
+				// console.log("Player: "+curplayer);
+				// console.log("si vs slotIndexes.length:"+si+" ... "+slotIndexes.length);
 				// execute card's attack
 				Game.cardAttack( slotIndexes[ si ] );
 				si++;
@@ -1663,9 +1660,6 @@ let Game = (function(namespace){
 		} else {
 			let wait = setTimeout( Game.endPhase, 1000 );
 		}
-		
-		
-		
 	}
 	Game.cardAttack = function ( slotIndex ) {
 		console.log("Game.cardAttack( "+slotIndex+" )");
@@ -1825,8 +1819,12 @@ let Game = (function(namespace){
 	//
 	// =====================================================================================
 
-	function AIPlayCard () {
-		console.log("AIPlayCard()");
+	
+	
+
+	function AISelectCard () {
+		console.log("AISelectCard()");
+		// Select card from AI deck
 		// Get Cards We can afford
 		// Game.unlockPlayableCards( computerPlayer );
 		let cards;
@@ -1835,18 +1833,47 @@ let Game = (function(namespace){
 		} else {
 			cards = computerPlayer.deck.cards_ar.filter( card => !card.locked && card.type == "spell" );
 		}
-		
-		console.log("cards not locked: ");
-		console.log(cards);
 
 		// Of those, randomly pick one
 		let card = cards[ Math.floor( Math.random()*cards.length ) ];
-		console.log("card chosen:");
-		console.log(card);
-		console.log("Player's element value: "+computerPlayer.getElement(card.elementIndex));
-		console.log("card.cost: " +card.cost);
-		console.log("All values: "+computerPlayer.elementValues);
 
+		// Display Selected card until Human player acknowledges (clicks)
+		Game.selectCard( card );
+		AIShowSelectedCard( card );
+	}
+	function AIShowSelectedCard () {
+		console.log("AIShowSelectedCard()");
+		let displayCard = Game.duplicateCard ( Game.selectedCard );
+		displayCard.undim();
+		// displayCard.el.style.transformOrigin = "top left";
+		// displayCard.shadow.style.transformOrigin = "top left";
+		// $(displayCard.el).css("transform","scale(2)");
+		// $(displayCard.shadow).css("transform","scale(2)");
+		let pos = $(AICardGrid).position();
+		console.log("pos: "+pos.left+", "+pos.top);
+		console.log("typeof pos.left: "+(typeof pos.left) );
+		displayCard.x = 200;
+		displayCard.y = 50;
+		// displayCard.width = cardWidth*2;
+		// displayCard.height = cardHeight*2;
+		console.log("displayCard.x: "+displayCard.x);
+		
+		
+
+		// When user clicks the card...
+		let evt = isTouch ? 'touchend' : 'click';
+		$(displayCard.el).on( evt, () => {
+			displayCard.kill();
+			AIPlayCard ();
+			computerPlayer.deck.lock();
+			// Game.endPhase();
+			Game.resolveAttacks();
+		} );
+		
+	}
+	function AIPlayCard () {
+		console.log("AIPlayCard()");
+		let card = Game.selectedCard;
 		// If creature, 
 		if ( card.type == "creature" ) {
 			// pick a slot
