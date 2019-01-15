@@ -1,0 +1,1902 @@
+<!doctype html>
+<html>
+<head>
+
+<!-- import TweenMax and jquery -->
+
+<!-- 
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+<script src="https://s0.2mdn.net/ads/studio/cached_libs/tweenmax_1.19.1_92cf05aba6ca4ea5cbc62b5a7cb924e3_min.js"></script> -->
+
+<script src="libs/jquery-2.1.0.js"></script>
+<script src="libs/TweenMax.min.js"></script>
+
+<style>
+html, body {
+	width: 100%;
+	height: 100%;
+	margin: 0;
+}
+body {
+	background-image: url('images/tabletop-tile-tandark.jpg');
+}
+#game-container {
+	/*border: 1px dashed orange;*/
+	position: relative;
+	width: 800px;
+	transform-style: preserve-3d;
+	perspective: 2000px;
+	transform: scale( 1 );
+}
+#player-card-deck {
+	position: absolute;
+	left: 440px;
+	top: 410px;
+	background: rgba(255, 255, 255, 0.5);
+	border: 2px solid black;
+	box-sizing: border-box;
+}
+.game-element {
+	position: absolute;
+	box-sizing: border-box;
+}
+.player-element {
+	position: absolute;
+	border: 2px solid brown;
+}
+.player-element .portrait {
+	display: block;
+	width: 110px;
+	height: 110px;
+}
+.player-element-field, .player-hp-field, .player-field {
+	position: absolute;
+	/*display: block;*/
+	box-sizing: border-box;
+	font-size: 1em;
+	color: white;
+	font-family: serif;
+	border: 1px solid brown;
+	background: rgba(0,0,0,0.4);
+	text-align: center;
+	padding: 0.2em 0.3em;
+}
+.player-field {
+	white-space: nowrap;
+	}
+.player-hp-field {
+	font-family: sans-serif;
+	font-weight: bold;
+}
+
+/* 
+ -----------------------------
+	
+	CARD
+
+ -----------------------------
+*/
+.card {
+	font-family: sans-serif;
+	font-size: 10px;
+	color: #333;
+	/*box-shadow: 5px 5px 6px rgba(0,0,0,0.5);*/
+	transform-style: preserve-3d;
+}
+.card, .card-front, .card-back, .card-shadow, .card-hilite, .card-dim, .card-slot {
+	position: absolute;
+/*	width: 100px;
+	height: 147px;*/
+	border-radius: 1em;
+	box-sizing: border-box;
+}
+.card-hilite {
+	box-shadow: 0px 0px 12px 6px rgba(255,255,0,0.6);
+}
+.card-dim { 
+	background-color: rgba(128,128,128,0.5);
+	visibility: visible;
+	/*border: 2px solid grey;*/
+	/*z-index: 1000;*/
+	/*backface-visibility: visible;*/
+	visibility: visible;
+	width: 100%;
+	height: 100%;
+	transform: rotateY( 180deg );
+ }
+.card-front, .card-back {
+	-webkit-backface-visibility: hidden;
+	-moz-backface-visibility: hidden;
+	backface-visibility: hidden;
+	/*border: 2px solid grey;*/
+	
+	padding: 0.5em;
+}
+.card-front {
+	background-color: #fdf2e2;
+	background-image: url('images/bg-texture-light-300x300.jpg');
+	background-size: cover;
+	transform: rotateY( 180deg );
+}
+.card-back {
+	background-color: brown;
+	background-image: url('images/tcgplayer-logo-color_320x120.png'), url('images/bg-texture-300x300.jpg');
+	background-position: center 45%, center;
+	background-repeat: no-repeat, no-repeat;
+	background-size: 90% auto, cover;
+	z-index: 2;
+	/*transform: rotateY( 0deg );*/
+	/*background-size: contain;*/
+	/*border: 1px solid black;*/
+}
+.card span {
+	margin-right: .2em;
+	border-radius: 1em;
+}
+/*.card .cost {
+	font-weight: 900;
+	background-color: white;
+	padding: .1em;
+	border: 1px solid #b89f94;
+	text-align: center;
+	display: inline-block;
+}*/
+.card .title {
+	font-weight: 900;
+	font-family: serif;
+	font-size: 1.5em;
+	color: #6d5246;
+}
+.card .title:after {
+	white-space: pre;
+	content:'\A';
+}
+.card .illustration-creature, .card .illustration-spell {
+	border: 2px solid #b89f94;
+	border-color: #b89f94 #d4c2ba #dacac3 #c4aba1;
+	width: 100%;
+	height: auto;
+	box-sizing: border-box;
+}
+.card .illustration-spell {
+	border-radius: 50%;
+}
+.card .attributes {
+	text-align: right;
+}
+.card .attributes span {
+	font-weight: bold;
+	background-color: white;
+	padding: .1em .2em;
+	border: 1px solid black;
+	text-align: center;
+	display: inline-block;
+	vertical-align: middle;
+}
+.card .attributes .attack {
+	background-color: #ff8a8a;
+}
+.card .attributes .defense {
+	background-color: #8abbff;
+}
+.card .attributes .cost {
+	background-color: #ffe647;
+}
+.card .attributes .hp {
+	background-color: #8aff9b;
+}
+.card-shadow {
+	box-shadow: 0px 0px 10px 4px rgba(0,0,0,0.5);
+	transform-style: preserve-3d;
+	/*margin: 10px 0 0 10px;*/
+	background-color: rgba(0,0,0,0.5);
+}
+
+/* 
+ -----------------------------
+	
+	CARD RACK
+
+ -----------------------------
+*/
+.card-slot {
+	position: absolute;
+	background-color: rgba( 128, 128, 255, 0.5 );
+	border: 1px solid white;
+	box-shadow: inset 0 0 1em rgba(0,0,0,0.5);
+}
+.card-rack {
+	border: 1px solid black;
+	background-color: rgba( 255, 255, 255, 0.65 );
+	box-shadow: inset 0 0 20px brown;
+}
+
+#bg {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	background-color: rgba(0,0,0, 0.5);
+}
+#layout {
+	position: absolute;
+	display: block;
+	background: url( "images/gameplay_spectromancer.jpg" );
+	background-repeat: no-repeat;
+	background-size: contain;
+	width: 900px;
+	height: 100%;
+	/*border: 2px dashed yellow;*/
+	
+}
+#ai-cards {
+	position: absolute;
+	top: 450px;
+	left: 10px;
+	padding: 15px;
+	box-sizing: border-box;
+	border: 1px solid white;
+	box-shadow: inset 0 0 20px black;
+	transform-origin: top left;
+	transform: scale(0.6);
+}
+
+/* 
+ -----------------------------
+	
+	GUI
+
+ -----------------------------
+*/
+.points-field { 
+	position: absolute;
+	font-family: sans-serif;
+	font-weight: bold;
+	font-size: 1em;
+	width: 4em;
+	margin-right: -2em;
+	margin-top: -0.5em;
+}
+.points-field.positive {
+	color: green;
+	text-shadow:
+	   -1px -1px 0 #FFF,  
+	    1px -1px 0 #FFF,
+	    -1px 1px 0 #FFF,
+	     1px 1px 0 #FFF;
+}
+.points-field.negative {
+	color: red;
+	text-shadow:
+	   -1px -1px 0 #000,  
+	    1px -1px 0 #000,
+	    -1px 1px 0 #000,
+	     1px 1px 0 #000;
+}
+
+</style>
+
+</head>
+<body>
+<!-- <span style="font-family: sans-serif; font-size: 0.5em; color: #555;" >Tested in webkit</span> -->
+<!-- <img id="layout" src="images/gameplay_spectromancer.jpg" /> -->
+<!-- <div id="layout"></div> -->
+<div id="bg"></div>
+<div id="ai-cards"></div>
+<!-- 
+
+
+
+Currently, card deck is only generated once, as part of the process of creating a player (either Human or AI).  Need to allow for changing cards in a deck.
+
+Deck.changeCards() ? 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+ -->
+<script>
+let Game = (function(namespace){
+	// Isolated namespace for all this code...
+
+	let isTouch = ("touchstart" in document.documentElement);
+	let cardWidth = 94,
+		cardHeight = 126,
+		gameContainer = document.createElement("div");
+	gameContainer.id = "game-container";
+	document.body.appendChild(gameContainer);
+
+	let playerCardGrid = document.createElement("div");
+	playerCardGrid.id = "player-card-deck";
+	$(playerCardGrid).css({width: cardWidth*4 +30, height: cardHeight*4 +30, padding: 15});
+	gameContainer.appendChild( playerCardGrid );
+
+	let AICardGrid = document.getElementById("ai-cards");
+	$(AICardGrid).css({width: cardWidth*4 +30, height: cardHeight*4 +30});
+
+	let computerPlayer, livePlayer;
+
+
+	/////////////////////////////////////////////////////
+	//
+	//	GAME ELEMENT CLASS -- Not sure we need this
+	//
+	/////////////////////////////////////////////////////
+	/* 
+	*  GameElement is basic model for a 'physical' game piece - eg. Card, slot, etc
+	*  Not to be confused with the Game object, which is not to be confused with the Game namespace
+	*/
+
+	class GameElement {
+		constructor ( el ) {
+			// console.log('GameElement constructor()');
+			this._x = 0, this._y = 0;
+			this._myEl = el;
+			this._height = $(el).outerHeight();
+			this._width = $(el).outerWidth();
+			$(this._myEl).addClass("game-element");
+		}
+		animateTo( x, y ) {
+			if ( typeof x === "number" && typeof y === "number" ) {
+				this._y = y;
+				this._x = x;
+				let dur = 1;
+				TweenMax.to( this._myEl, dur, {css:{left: this._x, top: this._y}, delay: 0, ease:Power2.easeIn});
+			}
+		}
+		kill () {
+			$(this.el).remove();
+			delete this;
+		}
+		// getters & setters
+		set x ( value ) {
+		 	if ( value != undefined ) {
+		 		this._x = value;
+	 			TweenMax.set( this._myEl, {x:value});
+		 	}
+		 }
+		get x () {
+			// console.log("GameElement.get x");
+			return this._x;
+		}
+		set y ( value ) {
+		 	if ( value != undefined ) {
+		 		this._y = value;
+		 		TweenMax.set( this._myEl, {y:value});	
+		 	} 
+		 }
+		get y () {
+			return this._y;
+		}
+		get el () {
+			return this._myEl;
+		}
+		set height ( value ) {
+			if ( value != undefined ) {
+				TweenMax.set( this._myEl, {height:value});
+				this._height = value;
+			}
+		}
+		get height () {
+			return $(this.el).outerHeight();
+		}
+		set width ( value ) {
+			if ( value != undefined ) {
+				TweenMax.set( this._myEl, {width:value});
+				this._width = value;
+			}
+		}
+		get width () {
+			return $(this.el).outerWidth();
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+	///////////////////////////////////////////
+	//
+	//		CARD CLASS
+	//
+	///////////////////////////////////////////
+
+	class Card extends GameElement {
+
+		/*
+		Handle non-attack effects for each card
+		...
+		Damage host 
+		Damage enemy
+		Heal host
+		Increase host element power
+		Decrease host element power
+		Decrease enemy element power
+		Effects at start or end of owner's turn,
+		Effects at start or end of enemy's turn
+		Effects on summon
+		Effects on "die"
+		Also, cards should have (effects at end of owner's turn):
+
+		Owner Element modifiers: [w,x,y,z]
+		Opponent Element modifiers: [w,x,y,z]
+		Owner HP modifier: x
+		Opponent HP mofifier: x
+		Self (creature) HP modifier: x
+		Neighbors (creatures) HP modifiers: [x,y]
+		Siblings (creatures) HP modifier: x
+
+		For Spells:
+
+
+		// Does the spell operate automatically?
+
+			// on the Active player?
+
+			// and/or on the Passive player?
+
+			// and/or on Active player card?
+
+			// and/or on Passive player card?
+
+		// Or does spell require clicking on a target card?
+
+			// Owner's card?
+
+			// Opponent's card?
+		*/
+
+		constructor ( ele, atk, def, hp, cost, img, tit, type ) {
+			// console.log('Card constructor('+ele+', '+atk+', '+def+', '+cost+', '+img+', '+tit+', '+hp+')');
+			let _el = document.createElement("div");
+			super( _el );
+			this.init(atk, def, cost, img, tit, ele, hp, type);
+		}
+
+		init ( atk, def, cost, img, tit, ele, hp, type ) {
+			this._type = type; // "creature" or "spell"
+			this._faceShowing = -1;
+			this._attack = atk != undefined ? atk : 0;
+			this._defense = def != undefined ? def : 0;
+			this._cost = cost != undefined ? cost : 0;
+			this._level = this._attack + this._defense + this._cost;
+			this._imgSrc = img != undefined ? img : "";
+			this._title = tit != undefined ? " "+tit : "...";	
+			this._specials = {},
+			this._shadowEl = document.createElement("div");
+			this._hp = hp;
+			this._locked = false;
+			this.assemble();
+			this.attack = atk;
+			this.defense = def;
+			this.cost = cost;
+			this.elementIndex = ele;
+			this._slot = null;
+			// 
+			let evt = isTouch ? 'touchend' : 'click';
+			$(this.el).on( evt, () => {
+				this.select() 
+			} );
+		}
+
+		assemble () {
+			// Assemble Me
+			// console.log("Card.assemble()");
+			$(this.el).addClass("card");
+			// Front
+			this._front = document.createElement("div");
+			this._front.className = "card-front";
+			// Back
+			this._back = document.createElement("div");
+			this._back.className = "card-back";
+			// Title
+			this._titleEl = document.createElement("span");
+			this._titleEl.className = "title";
+			// Level
+			// this._lvlEl = document.createElement("span");
+			// this._lvlEl.className = "level";
+			// Attributes
+			this._attributesEl = document.createElement("div");
+			this._attributesEl.className = "attributes";
+			// Attack
+			this._atkEl = document.createElement("span");
+			this._atkEl.className = "attack";
+			// Defense
+			this._defEl = document.createElement("span");
+			this._defEl.className = "defense";
+			// Cost
+			this._costEl = document.createElement("span");
+			this._costEl.className = "cost";
+			// HP
+			this._hpEl = document.createElement("span");
+			this._hpEl.className = "hp";
+			// Image
+			this._imgEl = document.createElement("img");
+			this._imgEl.className = "illustration-"+this._type;
+			// Shadow
+			this._shadowEl.className = "card-shadow";
+			// Dim cover
+			this._dimEl = document.createElement("div");
+			this._dimEl.className = "card-dim";
+			// 
+			this.el.appendChild(this._front);
+			this.el.appendChild(this._back);
+			this.el.appendChild(this._dimEl);
+			// this._front.appendChild(this._lvlEl);
+			
+			this._front.appendChild(this._titleEl);
+			this._front.appendChild(this._imgEl);
+			this._front.appendChild(this._attributesEl);
+			this._attributesEl.appendChild(this._atkEl);
+			this._attributesEl.appendChild(this._defEl);
+			this._attributesEl.appendChild(this._costEl);
+			this._attributesEl.appendChild(this._hpEl);
+			gameContainer.appendChild(this._shadowEl);
+			gameContainer.appendChild(this.el);
+			TweenMax.set(this.el, { width: cardWidth, height: cardHeight, transform:"translateZ(10px)" });
+			TweenMax.set(this._front, { width: cardWidth, height: cardHeight });
+			TweenMax.set(this._back, { width: cardWidth, height: cardHeight });
+			TweenMax.set(this._shadowEl, { width: cardWidth, height: cardHeight, transform:"translateZ(0px)" });
+		}
+
+		changeParent ( el ) {
+			if ( el instanceof HTMLElement ) {
+				$(this._shadowEl).detach();
+				$(el).append($(this._shadowEl));
+				
+				$(this.el).detach();
+				$(el).append($(this.el));
+			}
+		}
+		
+		update ( ) {
+			// console.log("Card.update()")
+		 	this._atkEl.textContent = this._attack;
+		 	this._defEl.textContent = this._defense;
+		 	this._costEl.textContent = this._cost;
+		 	// this._lvlEl.textContent = this._level;
+		 	this._titleEl.textContent = this._title;
+		 	this._hpEl.textContent = this._hp;
+		 	this._imgEl.src = this._imgSrc;
+		 }
+
+		 takeDamage ( value ) {
+		 	console.log("Card.takeDamage( "+value+" )");
+		 	if ( value != undefined ) {
+		 		this.hp -= value;
+		 		if ( this.hp <= 0 ) {
+		 			this.kill();
+		 		}
+		 	}
+		 }
+
+		kill () {
+			console.log("Card.kill()");
+			console.log("mySlot: "+this.mySlot);
+			$(this._shadowEl).remove();
+			this.mySlot.card = null;
+			super.kill();
+		}
+
+		setSelectBehavior ( func ) {
+			// console.log("Card.setSelectBehavior( "+func+" )");
+			this._onSelectFunction = func;
+		}
+		removeSelectBehavior ( func ){
+			this._onSelectFunction = null;
+			
+			let evt = isTouch ? 'touchend' : 'click';
+			if ( func ) {
+				$(this.el).off( evt, func );
+			} else {
+				$(this.el).off( evt );
+			}
+			
+		}
+		lock () {
+			this._locked = true;
+			this.dim();
+			this.deselect();
+		}
+		unlock () {
+			this._locked = false;
+			this.undim();
+		}
+		dim () {
+			this._dimEl.style.visibility = "visible";
+		}
+		undim () {
+			this._dimEl.style.visibility = "hidden";
+		}
+		select () {
+			console.log("Card.select()");
+			console.log("_locked: "+this._locked);
+			if ( !this._locked ) {
+				try { this._onSelectFunction() }
+				catch (error) { console.log( "ERROR:  "+error ) };
+				// this.hilite();
+			}
+		}
+		deselect () {
+			if ( this._onDeselectFunction ) {
+				this._onDeselectFuntion();
+			}
+			if ( Game.selectedCard === this ) {
+				Game.selectedCard = null;
+			}
+			this.unhilite();
+		}
+
+		hilite( ) {
+			this.el.style.border = "2px solid black";
+			this.el.style.boxShadow = " 0px 0px 10px 10px yellow";
+		}
+
+		unhilite () {
+			this.el.style.border = "none";
+			this.el.style.boxShadow = "none";
+		}
+
+		flip ( immediate ) { //x, y
+
+			// set up Tween parameters
+			if ( document.contains( this.el ) ) {
+				let c = this;
+				let rotY = c._faceShowing === 1 ? "+=180" : "-=180";
+				if ( immediate ) {
+					TweenMax.set( c.el, {rotationY: rotY});
+				} else {
+					// let x2 = x == undefined ? c._x : x;
+					// let y2 = y == undefined ? c._y : y;
+					// let dx = x2-c._x, dy = y2-c._y;
+					// let dist = Math.sqrt( dx*dx + dy*dy );
+					// let dur = 0.4 + 0.5 * dist / 700;
+					let dur = 0.4;
+
+					// card
+					TweenMax.to( c.el, dur, {css:{rotationY: rotY}, delay: 0, ease:Power2.easeIn});
+					TweenMax.to( c.el, dur, {css:{z:"+=200"}, yoyo:true, repeat:1, ease:Sine.easeInOut});
+					// TweenMax.to( c.el, .75*dur, {css:{x:x2, y:y2}, ease:Power2.easeOut});
+					// shadow
+					TweenMax.to(c.shadow, dur, {css:{rotationY: rotY}, delay: 0, ease:Power2.easeIn});
+					TweenMax.to(c.shadow, dur, {css:{z:"+=200"}, yoyo:true, repeat:1, ease:Sine.easeInOut});
+					// TweenMax.to(c.shadow, .75*dur, {css:{x:x2, y:y2}, ease:Power2.easeOut});
+				}			
+				this._faceShowing *= -1;
+			}
+		}
+
+		removeEl () {
+			if ( gameContainer.contains( this.el )) {
+				gameContainer.removeChild( this.el );
+			}
+			if ( gameContainer.contains( this._shadowEl )) {
+				gameContainer.removeChild( this._shadowEl );	
+			}
+		}
+
+		// getters + setters 
+		get locked () {
+			return this._locked;
+		}
+		set mySlot ( value ) {
+			if ( value instanceof Slot ){
+				this._slot = value;	
+			}
+		}
+		get mySlot () {
+			return this._slot;
+		}
+
+		set attack ( value ) {
+
+			if ( value != undefined ) {
+				this._attack = value;
+				// this._level = this._attack + this._defense + this._cost;
+				this.update();
+			} 
+		}
+		get attack() {
+			return this._attack;
+		}
+						
+		set defense ( value ) {
+		 	if ( value != undefined ) {
+		 		this._defense = value;
+		 		// this._level = this._attack + this._defense + this._cost;
+		 		this.update();
+		 	} 
+		 }
+		get defense () {
+		 	return this._defense;
+	 	}
+		 				
+		set cost ( value ) {
+		 	if ( value != undefined ) {
+		 		this._cost = value;
+		 		// this._level = this._attack + this._defense + this._cost;
+		 		this.update();
+		 	} 
+		 }
+		get cost () {
+		 		return this._cost;
+	 	}
+
+	 	set hp ( value ) {
+	 		if ( value != undefined ) {
+	 			this._hp = value;
+	 			this.update();
+	 		}
+	 	}
+	 	get hp () {
+	 		return this._hp;
+	 	}
+		
+		get img () {
+	 		return this._imgSrc;
+	 	}
+		
+		get title () {
+	 		return this._title;
+	 	}
+		 
+		get shadow () {
+			return this._shadowEl;
+		}
+
+		set x ( value ) {
+			if ( typeof value === "number" ) {
+				super.x = value;
+				TweenMax.set( this._shadowEl, {x:value});
+			}
+		}
+		get x () {
+			return this._x;
+		}
+		set y ( value ) {
+			if ( typeof value === "number" ) {
+				super.y = value;
+				TweenMax.set( this._shadowEl, {y:value});
+			}
+		}
+		get y () {
+			return this._y;
+		}
+		get type () {
+			return this._type;
+		}
+		set type ( value ) {
+			if ( value === "creature" || value === "spell" ) {
+				this._type = value;
+			}
+		}
+	}
+
+	// -- End Card Constructor
+
+
+
+
+
+
+
+	
+
+
+
+	///////////////////////////////
+	//
+	//		Player Class
+	//
+	///////////////////////////////
+	/*
+		The entity that uses the cards
+	*/
+	class Player extends GameElement {
+		constructor ( name, portraitSrc ) {
+			console.log('Player constructor()');
+			let _el = document.createElement("div");
+			super( _el );
+			this._size = 110;
+			this._el = _el;
+			this.name = name;	
+			this.portraitSrc = portraitSrc != undefined ? portraitSrc : "player_default.gif";
+			this.init();
+			this.assemble();
+		}
+
+		init () {
+			$(this._myEl).addClass("player-element");
+			this._portraitImg = document.createElement("img");
+			this._portraitImg.className = "portrait";
+			this._portraitImg.src = "images/"+this.portraitSrc;
+			this._elementValues = [1,1,1,1];
+			this._elementNames = [ "supplies", "downtime", "productivity", "incentives" ];
+			this._hp = 50;
+			this.rack = new Rack();
+			this.deck = new Deck();
+			// console.log("this.deck: "+this.deck);
+			// console.log(this.deck);
+			// console.log("this.deck.x: "+this.deck.x);
+		}
+		assemble () {
+			this._el.appendChild(this._portraitImg);
+			gameContainer.appendChild(this._el);
+			// HP
+			let _hp_el = document.createElement("span");
+			_hp_el.className = "player-hp-field";
+			this._el.appendChild( _hp_el );
+			this.hpField = _hp_el;
+			this.hp = this._hp;
+			// ELEMENTS
+			let _elementField0 = document.createElement("span");
+			let _elementField1 = document.createElement("span");
+			let _elementField2 = document.createElement("span");
+			let _elementField3 = document.createElement("span");
+			this._elementFields = [_elementField0, _elementField1, _elementField2, _elementField3];
+			// position them
+			for ( let i = 0; i < this._elementFields.length; i++ ){
+				let field = this._elementFields[i];
+				field.className = "player-element-field";
+				field.innerHTML = this._elementNames[i] + ": <br/>" + this._elementValues[i];
+				this._el.appendChild( field );
+			}
+			// NAME
+			this.nameField = document.createElement("span");
+			this.nameField.className = "player-field";
+			this._el.appendChild( this.nameField );
+			this.nameField.textContent = this.name;
+		}
+		// getters & setters
+		set hp ( value ) {
+		 	if ( value != undefined ) {
+		 		this._hp = value;
+		 		this.hpField.textContent = value;
+		 	}
+		 }
+		get hp () {
+			return this._hp;
+		}
+		takeDamage( value ) {
+			console.log("Player.takeDamage( "+value+" )");
+			this.hp =  this.hp - value;
+		}
+		position ( xvalue, yvalue ) {
+			this._x = xvalue;
+			this._y = yvalue;
+		}
+		// 
+		setElement ( index, value ) {
+			if ( index != undefined && value != undefined ) {
+				this._elementValues[ index ] = value;
+				this._elementFields[ index ].innerHTML = this._elementNames[ index ] + ": <br/>" + value;
+			}
+		}
+		getElement ( value ) {
+			let index = typeof value === "number" ? value : this._elementNames.indexOf( value );
+			if ( index === Number.parseInt( index, 10 ) ) {
+				return this._elementValues[ index ];
+			}
+		}
+		subtractFromElement ( index, value ) {
+			console.log("Player.subtractFromElement( "+index+", "+value+")");
+			if ( index === Number.parseInt( index, 10 ) && typeof value === "number" ) {
+				console.log("value: "+this.getElement(index));
+				this.setElement( index, this.getElement( index ) - value );
+				console.log("new value: "+this.getElement(index));
+			}
+		}
+		addToElement ( index, value ) {
+			if ( index === Number.parseInt( index, 10 ) && typeof value === "number" ) {
+				this.setElement( index, this.getElement( index ) + value );
+			}
+		}
+		get elementValues () {
+			return this._elementValues.slice(0);;
+		}
+		set elementValues ( ar ) {
+			if ( Array.isArray( ar ) ) {
+				for ( let i = 0; i < this._elementValues.length; i++ ) {
+					if ( typeof ar[0] === "number") {
+						this._elementValues[i] = ar[i];
+					}
+				}
+			}
+		}
+		set x( value ) {
+			if ( value != undefined ) {
+				super.x = value;
+				this.rack.x = this._x + 260;
+			}
+		}
+		get x() {
+			return this._x;
+		}
+		
+	}
+
+
+
+
+
+	///////////////////////////////
+	//
+	// Human Player
+	//
+	///////////////////////////////
+	class HumanPlayer extends Player {
+		constructor ( portraitSrc ) {
+			console.log("HumanPlayer constructor()");
+			super( portraitSrc );
+		}
+		init () {
+			super.init();
+			for ( let i = 0; i < this.rack.slots.length; i++ ) {
+				let slot = this.rack.slots[i];
+				// Handle Clicking Slots
+				let evt = isTouch ? 'touchend' : 'click';
+				$(slot.el).on( evt, () => {
+					Game.clickSlot( slot );
+				})
+			};
+			// Handle clicking cards
+			// Does this belong in Game object?  .startTurn, .humanPhase, .startGame?
+			for ( let c = 0; c < this.deck.cards_ar.length; c++ ) {
+				let card = this.deck.cards_ar[c];
+				card.setSelectBehavior( Game.clickCard );
+			}
+		}
+		assemble(){
+			super.assemble();
+			for ( let i = 0; i < this._elementFields.length; i++ ){
+				let field = this._elementFields[i];
+				Game.positionElement( field, 370+ 91*i, this._size - Game.getElementHeight( field ) ) ;
+				$(field).css( "width", 88 );
+			}
+			Game.positionElement(this.hpField, this._size, this._size - Game.getElementHeight( this.hpField ) );
+			Game.positionElement(this.nameField, this._size + Game.getElementWidth( this.hpField ) + 8, this._size - Game.getElementHeight( this.nameField ) );
+		}
+		set y ( value ) {
+			if ( value != undefined ) {
+				super.y = value;
+				this.rack.y = this._y - ( this.rack.height - this.height ) - 50;
+			}
+		}
+		get y () {
+			return this._y;
+		}
+	}
+
+
+
+
+
+	///////////////////////////////
+	//
+	// AI Player
+	//
+	///////////////////////////////
+	class AIPlayer extends Player {
+		constructor ( portraitSrc ) {
+			console.log("AIPlayer constructor()");
+			super( portraitSrc );
+			// this.deck.removeEl();
+		}
+		assemble(){
+			super.assemble();
+			for ( let i = 0; i < this._elementFields.length; i++ ){
+				let field = this._elementFields[i];
+				Game.positionElement( field, 370+ 91*i, 0 ) ;
+				$(field).css( "width", 88 );
+			}
+			Game.positionElement(this.hpField, this._size, 0 );
+			Game.positionElement(this.nameField, this._size + Game.getElementWidth( this.hpField ) + 8, 0 );
+		}
+		set y ( value ) {
+			if ( value != undefined ) {
+				super.y = value;
+				this.rack.y = this._y + 50;
+			}
+		}
+		get y () {
+			return this._y;
+		}
+	}
+
+
+
+
+
+
+
+
+
+	///////////////////////////////
+	//
+	// 		RACK (row of cards) CLASS
+	//
+	///////////////////////////////
+	class Rack extends GameElement {
+		constructor () {
+			console.log("Rack constructor()");
+			let _myEl = document.createElement("div");
+			super( _myEl );
+			// console.log("rack _x: "+this._x+", _y: "+this._y);
+			this._myEl = _myEl;
+			$(this._myEl).addClass("card-rack");
+			this.init();
+			this.assemble();
+
+		}
+
+		init () {
+			this._numSlots = 6;
+			this._slots = [];
+			for ( let i = 0; i < this._numSlots; i++ ) {
+				let slot = new Slot( i );
+				this._slots.push( slot );
+				this._myEl.appendChild( slot.el );
+				slot.x = i * cardWidth;
+			}
+		}
+
+		assemble(){
+			gameContainer.appendChild( this._myEl );
+			this.width = 6*cardWidth;
+			this.height = cardHeight;
+		}
+
+		putCardInSlot ( card, slotArg ) {
+
+			// argument [slotArg] is instance of Slot or is an integer
+			let slot = slotArg instanceof Slot ? slotArg :  this._slots[ slot ];
+
+			if ( card instanceof Card && slot instanceof Slot ) {
+				slot.card = card;
+				card.x = this._x + slot.x;
+				card.y = this._y + slot.y;
+			}
+		}
+
+		clearSlot ( slotArg ) {
+			// argument [slotArg] is instance of Slot or is an integer
+			let slot = slotArg instanceof Slot ? slotArg :  this._slots[ slot ];
+			slot.clear();
+		}
+
+		getEmptySlots () {
+			let emptySlots = this._slots.filter( slot => slot.card == undefined );
+			return emptySlots;
+		}
+
+		get slots () {
+			return this._slots;
+		}
+		get slotAvailable () { 
+		// returns booelan
+			for ( let s = 0; s < this._slots.length; s ++ ) {
+				if ( this._slots[s].card == undefined ) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
+
+
+
+	///////////////////////////////
+	//
+	// 		Slot (card holder) CLASS
+	//
+	///////////////////////////////
+	class Slot extends GameElement {
+		constructor ( rack, index ) {
+			let _myEl = document.createElement("div");
+			super( _myEl );
+			this._myRack = rack;
+			this._myEl = _myEl;
+			$(this._myEl).addClass("card-slot");
+			this._index = index;
+			this.init();
+			this.assemble();
+		}
+		init () {
+			this._content = null;
+		}
+		assemble () {
+			this.width = cardWidth;
+			this.height = cardHeight;
+		}
+		clear () {
+			if ( this.card != null ) {
+				// delete the card
+				// this.card.kill();
+				this.card = null;
+			}
+		}
+		get card () {
+			return this._content;
+		}
+		set card ( card ) {
+			if ( card instanceof Card || card == undefined ) {
+				this._content = card;
+				if ( card instanceof Card ) {
+					card.mySlot = this;	
+				}
+				// animate card into this slot
+			}
+		}
+		get index () {
+			return this._index;
+		}
+		get rack () {
+			return this._myRack;
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+	///////////////////////////////
+	//
+	// 		DECK CLASS ( Set of Cards belonging to a player )
+	//
+	///////////////////////////////
+	/*
+		Deck is 4x4 - 4 elements, 4 levels (cost) per element
+	*/
+	class Deck extends GameElement {
+		constructor () {
+			console.log("Deck constructor()");
+			let _el = document.createElement("div");
+			super(_el);
+			gameContainer.appendChild(this.el);
+			// $(this.el).addClass( "card-deck" );
+			this._cards_ar = [];
+			this.init();
+
+		}
+
+		init () {
+			// Build deck of cards
+			// col = element-index, row = power (cost-range)
+			for( let col = 0; col < 4; col++ ) {
+				for( let row = 0; row < 4; row++ ) {
+					// pick a cost from range -> 0-2, 3-5, 6-8, 9-11
+					let cost = row * 3 + Math.floor( Math.random() * 3 );
+					let card = Game.pickCard( col, cost );
+					// $(card.el).detach();
+					// $(this.el).append(card.el);
+					card.changeParent(this.el);
+					card.x = col * cardWidth;
+					card.y = row * cardHeight;
+					this._cards_ar.push(card);
+				}
+			}
+		}
+
+		removeEl () {
+			for ( let c = 0; c < this._cards_ar.length; c++ ) {
+				this._cards_ar[c].removeEl();
+			}
+			if ( this.el.parentElement ) {
+				this.el.parentElement.removeChild( this.el );
+			}
+			
+		}
+
+		flipCards( immediate ) {
+			// Flip Cards
+			if ( immediate === true ) {
+				for ( let c = 0; c < this._cards_ar.length; c++ ) {
+					this._cards_ar[ c ].flip( true );
+				}
+			} else {
+				let cardIndex = 0;
+				let dur = 100;
+				let flipInterval = setInterval(() => 
+					{
+						this._cards_ar[ cardIndex ].flip();
+						cardIndex ++;
+						if ( cardIndex >= this._cards_ar.length ) {
+							clearInterval(flipInterval);
+						}
+					}
+					, dur);		
+			}
+				
+		}
+
+		hilite () {
+			console.log("Deck.hilite()");
+			for (let c = 0; c < this._cards_ar.length; c++ ) {
+				let card = this.cards_ar[c];
+				card.hilite();
+			}
+		} 
+
+		unhilite () {
+			for (let c = 0; c < this._cards_ar.length; c++ ) {
+				let card = this.cards_ar[c];
+				card.unhilite();
+			}
+		}
+
+		deselect () {
+			for ( let c = 0; c < this._cards_ar.length; c++ ){
+				this._cards_ar[c].deselect();
+			}
+		}
+
+		lock () {
+			for ( let c = 0; c < this._cards_ar.length; c++ ){
+				this._cards_ar[c].lock();
+			}
+		}
+
+		get cards_ar () {
+			return this._cards_ar;
+		}
+		set x ( value ) {
+			if ( value != undefined && typeof (value) == "number"){
+				super.x = value;
+				for ( let c = 0; c < this._cards_ar.length; c++ ) {
+					let card = this._cards_ar[c];
+					card.x = this._x + card.elementIndex * cardWidth;
+				}
+			}
+		}
+		get x () {
+			return this._x;
+		}
+		set y ( value ) {
+			if ( value != undefined && typeof (value) == "number"){
+				super.y = value;
+				for ( let c = 0; c < this._cards_ar.length; c++ ) {
+					let card = this._cards_ar[c];
+					card.y = this._y + Math.floor( card.cost / 3 ) * cardHeight;
+				}
+			}
+		}
+		get y () {
+			return this._y;
+		}
+		
+	}
+
+
+		
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	///////////////
+	////////////////////////////
+	///////////////////////////////////////////////////////
+	//
+	//
+	//		v GAME object (singleton?) v
+	//
+	//
+	///////////////////////////////////////////////////////
+	////////////////////////////
+	///////////////
+
+	let Game = {};
+
+	Game.turnNum = 0;
+	Game.turnPhase = 0; // 0 = human, 1 = AI
+	Game.activePlayer = null;
+	Game.passivePlayer = null;
+	Game.selectedCard = null;
+
+	Game.initGame = function() {
+		console.log("Game.initGame()");
+		Game.createTempCardSet();
+		// -----------------------------------------------
+		// Make Players, Human and AI
+		// -----------------------------------------------
+		computerPlayer = new AIPlayer( "AI Character" );
+		computerPlayer.x = 70;
+		computerPlayer.y = 0;
+		computerPlayer.setElement(0, 8);
+		computerPlayer.setElement(1, 5);
+		computerPlayer.setElement(2, 10);
+		computerPlayer.setElement(3, 3);
+		computerPlayer.deck.flipCards( true );
+		// console.log("computerPlayer.deck: "+computerPlayer.deck);
+		// computerPlayer.deck.removeEl();
+		// TEMP for visualizing:
+		// $(AICardGrid).detach();
+		$(computerPlayer.deck.el).detach();
+		$(AICardGrid).append($(computerPlayer.deck.el));
+		// $(computerPlayer.deck.el).css("top",300);
+		// $(computerPlayer.deck.el).css("border", "12px solid orange");
+
+		
+		// $(gameContainer).append($(AICardGrid));
+
+		livePlayer = new HumanPlayer( "Player" );
+		livePlayer.x =  70;
+		livePlayer.y = 290;
+		livePlayer.setElement(0, 5);
+		livePlayer.setElement(1, 10);
+		livePlayer.setElement(2, 3);
+		livePlayer.setElement(3, 8);
+
+		// Position Human player's cards
+		$(livePlayer.deck.el).detach();
+		$(playerCardGrid).append($(livePlayer.deck.el));
+		
+	}
+
+	Game.startGame = function () {
+		console.log("Game.startGame()");
+		// ***** --- > Start Game
+		// let pos = Game.getElementPosition(playerCardGrid);
+		// livePlayer.deck.x = pos.x;
+		// livePlayer.deck.y = pos.y;
+		livePlayer.deck.flipCards();
+		// wait is magic number, to wait for all the cards to flip over before making them available
+		let wait = setTimeout( Game.startTurn, 2500 );
+		
+	}
+	Game.startTurn = function () {
+		console.log("Game.startTurn()");
+		Game.turnNum ++;
+		console.log( "Turn "+Game.turnNum );
+		console.log("---------------------------------");
+		console.log("\r\n");
+		
+		Game.selectedCard = null;
+		Game.turnPhase = 0;
+		Game.startPhase();
+	}
+	Game.startPhase = function () {
+		console.log("Game.startPhase()");
+		console.log("Game.turnPhase: "+Game.turnPhase);
+		console.log("---------------------------------")
+
+		Game.activePlayer = Game.turnPhase === 0 ? livePlayer : computerPlayer;
+		Game.passivePlayer = Game.activePlayer === livePlayer ? computerPlayer : livePlayer;
+		
+		// Add Element points (+1 default)
+		Game.updatePlayerElementPoints();
+
+		if ( Game.turnPhase === 0 ) {
+			Game.startHumanPhase();
+		} else if ( Game.turnPhase === 1 ) {
+			Game.startAIPhase();
+		}
+	}
+	Game.endPhase = function () {
+		console.log("Game.endPhase()");
+		// Handle non-attack effects for each card
+		// ...
+		// Damage host 
+		// Damage enemy
+		// Heal host
+		// Increase host element power
+		// Decrease host element power
+		// Decrease enemy element power
+		// Game.resolveAttacks();
+		Game.turnPhase ++;
+
+		if ( Game.turnPhase >= 2 ) {
+			Game.endTurn();
+		} else {
+			Game.startPhase();
+		}
+		
+	}
+	// Game.nextPhase = function () {
+		
+	// 	Game.startPhase();
+		
+	// }
+	Game.endTurn = function () {
+		console.log("Game.endTurn()");
+		console.log("=============================\n\r")
+		Game.startTurn();
+	}
+	Game.startHumanPhase = function() {
+		console.log("Game.startHumanPhase()");
+		Game.unlockPlayableCards( livePlayer );
+	}
+	Game.startAIPhase = function () {
+		console.log("Game.startAIPhase()");
+		livePlayer.deck.lock();
+		Game.unlockPlayableCards( computerPlayer );
+		// Select card from AI deck
+		setTimeout( function() {
+			// pause so I can see AI deck unlocked
+			AIPlayCard ();
+
+			computerPlayer.deck.lock();
+			// Game.endPhase();
+			Game.resolveAttacks();
+		}, 1000 );
+		
+	}
+
+
+	
+	Game.unlockPlayableCards = function ( player ) {
+
+		// Lock Cards in Deck that are not playable by player's elementValues
+
+		let deck = player.deck.cards_ar;
+
+		let elementValues = player.elementValues;
+
+		// For each element, lock/unlock cards of that element which player can afford
+		for ( let e = 0; e < elementValues.length; e++ ) {
+			let elementIndex = e;
+			let elementValue = elementValues[e];
+			for ( let c = 0; c < deck.length; c++ ) {
+				let card = deck[c];
+
+				// If all Player Slots are filled, only Spell cards are eligible for unlocking
+				if ( card.elementIndex === elementIndex ) {
+					if ( card.cost > elementValue || ( !player.rack.slotAvailable && card.type === "creature" ) ) {
+						card.lock();
+					} else {
+						card.unlock();
+					}
+				}
+			}
+		}
+	}
+
+
+
+
+
+	Game.clickSlot = function ( slot ) {
+		console.log("Game.clickSlot()");
+		/*
+			Slot in a rack has been clicked / touched.  Decide what to do with that...
+		*/
+		// IF HumanPlayer has a card selected,
+
+		if ( Game.selectedCard instanceof Card 
+		// And the slot is empty
+		&& slot.card == undefined ) {
+			// must be creature because it is a selected card ( spells can't be selected )
+			Game.playCreatureCard( Game.selectedCard, slot );
+
+			// Deselect original card
+			Game.selectedCard.deselect();
+
+			livePlayer.deck.lock();
+
+			// Game.endPhase();
+			Game.resolveAttacks();
+		}
+	}
+	Game.duplicateCard = function ( card ) {
+		// Duplicate that card
+		let dupCard = new Card(
+		card.elementIndex,
+		card.attack,
+		card.defense,
+		card.hp,
+		card.cost,
+		card.img,
+		card.title,
+		card.type);
+		// Place face up on top of original card
+		dupCard.x = card.x;
+		dupCard.y = card.y;
+		dupCard.flip( true );
+		
+		return dupCard;
+	}
+	Game.selectCard = function( whichCard ) {
+		console.log("Game.selectCard()");
+		Game.selectedCard = whichCard;
+	}
+	Game.clickCard = function () {
+		console.log("Game.clickCard()");
+
+		// First, deselect all the cards
+		livePlayer.deck.deselect();
+
+		// If it's Human Player's turn
+		console.log("Game.activePlayer: "+Game.activePlayer);
+		console.log("livePlayer: "+livePlayer);
+		console.log("Game.activePlayer == livePlayer: "+(Game.activePlayer == livePlayer));
+		if ( Game.activePlayer === livePlayer
+
+		// ...and card isn't locked...
+		&& !this.locked ){
+			
+			// If card is type "spell"
+			if ( this.type == "spell" ) {
+				// Do the spell
+				Game.playSpellCard( this );
+				this.hilite();
+				let that = this;
+				setTimeout( function(){
+					that.unhilite();
+					livePlayer.deck.lock();
+					Game.resolveAttacks();
+				}, 100 );
+			} else if ( this.type == "creature" 
+				// Else if card is type "creature"
+			&& livePlayer.rack.slotAvailable ) {
+				// ...and slot is available in Human rack...
+				this.hilite();
+				// select that card to be placed in next slot clicked
+				Game.selectCard( this );
+			
+			}
+		}
+	}
+	
+	Game.playSpellCard = function ( card ) {
+		console.log("Game.playSpellCard()");
+		Game.chargePlayerForCard( card );
+
+		// Temp - just attack opponenet w/ card's attack value
+		console.log("card.attack: "+card.attack);
+		Game.passivePlayer.takeDamage( card.attack );
+		// Game.resolveAttacks();
+
+		// Does the spell operate automatically?
+
+			// on the Active player?
+
+			// and/or on the Passive player?
+
+			// and/or on Active player card?
+
+			// and/or on Passive player card?
+
+		// Or does spell require clicking on a target card?
+
+			// Owner's card?
+
+			// Opponent's card?
+
+	}
+
+	Game.playCreatureCard = function ( card, slot ) {
+		
+		Game.chargePlayerForCard( card );
+
+		let dupCard = Game.duplicateCard( card );
+		dupCard.undim();
+
+		Game.activePlayer.rack.putCardInSlot( dupCard, slot );
+
+		// Game.resolveAttacks();
+		
+	}
+
+	Game.chargePlayerForCard = function( card ) {
+		console.log("Game.chargePlayerForCard()");
+		console.log("card: ");
+		console.log(card);
+		console.log("Game.activePlayer.getElement("+card.elementIndex+")");
+		console.log(Game.activePlayer.getElement(card.elementIndex));
+		Game.activePlayer.subtractFromElement( card.elementIndex, card.cost );
+	}
+	Game.updatePlayerElementPoints = function () {
+		// Default +1 to each element
+		for ( let i = 0; i < Game.activePlayer.elementValues.length; i++ ) {
+			Game.activePlayer.addToElement( i, 1 );	
+		}
+	}
+	Game.resolveAttacks = function() {
+		
+		let slotIndexes = [];
+		for ( let s = 0; s < Game.activePlayer.rack.slots.length; s++ ) {
+			// Check each slot for a card
+			let card = Game.activePlayer.rack.slots[s].card;
+			if ( card != undefined ) {
+				slotIndexes.push( s );
+			}
+		}
+		if ( slotIndexes.length > 0 ) {
+			// If Player has any cards in rack...
+			let si = 0;
+			let attackWait = setInterval( function() {
+				console.log("Game.resolveAttacks(), setInterval");
+				let curplayer = Game.activePlayer == livePlayer ? "Human" : "Computer";
+				console.log("Player: "+curplayer);
+				console.log("si vs slotIndexes.length:"+si+" ... "+slotIndexes.length);
+				// execute card's attack
+				Game.cardAttack( slotIndexes[ si ] );
+				si++;
+				
+				if ( si >= slotIndexes.length ) {
+					clearInterval( attackWait );
+					let wait = setTimeout( Game.endPhase, 1000 );
+				}
+			}, 1000 );
+		} else {
+			let wait = setTimeout( Game.endPhase, 1000 );
+		}
+		
+		
+		
+	}
+	Game.cardAttack = function ( slotIndex ) {
+		console.log("Game.cardAttack( "+slotIndex+" )");
+		let card = Game.activePlayer.rack.slots[ slotIndex ].card;
+		let defenderCard = Game.passivePlayer.rack.slots[ slotIndex ].card;
+		// console.log("defenderCard: ");
+		// console.log(defenderCard);
+		// console.log("attackCard: ");
+		// console.log(card);
+		if ( card != undefined ) {
+			// Animate card
+			let dur = 0.5,
+				ty;
+			if ( Game.activePlayer === livePlayer ) {
+				// Slide up
+				ty = -30;
+			}else {
+				// Slide down
+				ty = +30;
+			}
+			TweenMax.to( card.el, dur, {css:{y:"+="+ty}, yoyo:true, repeat:1, ease:Sine.easeInOut, onRepeat: complete});
+			TweenMax.to( card.shadow, dur, {css:{y:"+="+ty}, yoyo:true, repeat:1, ease:Sine.easeInOut});
+	
+			function complete() {
+				console.log("Tween Complete()");
+				if ( defenderCard == undefined ) {
+					// no card, attack goes through to passivePlayer
+					Game.passivePlayer.takeDamage( card.attack );
+				}else {
+					// attack defender's card
+					defenderCard.takeDamage( card.attack );
+				}
+			}
+			
+		}
+	}
+
+
+
+	Game.positionElement = function( el, x, y ) {
+		$(el).css({top: y, left: x});
+	}
+	Game.getElementHeight = function( el ) {
+		return $(el).outerHeight();
+	}
+	Game.getElementWidth = function( el ) {
+		return $(el).outerWidth();
+	}
+	Game.getElementPosition = function( el ) {
+		let pos = $(el).position();
+		return { x: pos.left, y: pos.top };
+	}
+
+	/////////////////////////////////////////////////
+	//
+	//			BUILD GAME DECK (Master Deck)
+	//
+	/////////////////////////////////////////////////
+
+	Game.cards_ar = [];
+	// TEMP GENERATE ARTIFICIAL CARD TYPES:
+	// ALL CARDS
+	Game.createTempCardSet = function () {
+		// All the cards, from which "Decks" are selected, using "Game.pickCard()"
+		let names = ["supply", "downtime", "product", "incentive"];
+		for ( let t = 0; t < names.length; t++ ) {
+			for ( let i = 0; i < 12; i++ ) {
+				let name = names[t]+" "+i;
+				name = name.charAt(0).toUpperCase() + name.slice(1);
+				type = Math.random() < 0.5 ? "creature" : "spell";
+				Game.cards_ar.push( 
+					{ type: type, elementIndex: t, attack: i, defense: i, cost: i, src: "images/sample-image.jpg", name: name, hp: (i+2)*5 }
+				 );
+			}
+		}
+	}
+	
+	Game.makeCardByName = function ( name ) {
+		// console.log("makeCardByType( "+type+" )")
+		let cards = Game.cards_ar.filter( card => card.name == name );
+		let card = cards[0]; // There is only 1 card of each name
+		/*
+		 Also, cards should have (effects at end of owner's turn):
+
+		 Owner Element modifiers: [w,x,y,z]
+		 Opponent Element modifiers: [w,x,y,z]
+		 Owner HP modifier: x
+		 Opponent HP mofifier: x
+		 Self (creature) HP modifier: x
+		 Neighbors (creatures) HP modifiers: [x,y]
+		 Siblings (creatures) HP modifier: x
+		 */
+
+		return new Card ( card.elementIndex, card.attack, card.defense, card.hp, card.cost, card.src, card.name, card.type );
+	}
+
+	Game.pickCard = function ( elementIndex, cost ) {
+		
+		//	Select from the full card set, Game.cards_ar, a card of specified element type and cost 
+		
+		function meetsCriteria(card){
+			return card.elementIndex == elementIndex && card.cost == cost;
+		}
+		// create array of all cards that match the criteria.
+		elegibleCards_ar = Game.cards_ar.filter( meetsCriteria );
+		// then randomly pick one.
+		let index = Math.floor( Math.random()*(elegibleCards_ar.length-1) );
+		let name = elegibleCards_ar[ index ].name;
+		return Game.makeCardByName( name );
+	}
+
+	Game.GUIanimatePoints = function( points, el ) {
+		let pointsEl = document.createElement("span");
+		let sign = points > 0 ? "positive" : "negative";		
+		pointsEl.className = "points-field "+sign;
+
+
+	}
+
+
+
+
+	//				^ End Game Object ^												//
+	//  																			//
+	//////////////////////////////////////////////////////////////////////////////////
+
+
+
+
+
+
+
+
+	// =====================================================================================
+	//
+	//
+	// 			v POINT OF ENTRY v
+	//
+	//
+	// =====================================================================================
+
+	Game.initGame();
+	Game.activePlayer = computerPlayer;
+	// fillAIRack()
+	Game.startGame();
+	
+
+
+
+
+
+	// =====================================================================================
+	//
+	//
+	// 			v TEMP SETUP STUFF v
+	//
+	//
+	// =====================================================================================
+
+	function AIPlayCard () {
+		console.log("AIPlayCard()");
+		// Get Cards We can afford
+		// Game.unlockPlayableCards( computerPlayer );
+		let cards;
+		if ( computerPlayer.rack.slotAvailable ) {
+			cards = computerPlayer.deck.cards_ar.filter( card => !card.locked );
+		} else {
+			cards = computerPlayer.deck.cards_ar.filter( card => !card.locked && card.type == "spell" );
+		}
+		
+		console.log("cards not locked: ");
+		console.log(cards);
+
+		// Of those, randomly pick one
+		let card = cards[ Math.floor( Math.random()*cards.length ) ];
+		console.log("card chosen:");
+		console.log(card);
+		console.log("Player's element value: "+computerPlayer.getElement(card.elementIndex));
+		console.log("card.cost: " +card.cost);
+		console.log("All values: "+computerPlayer.elementValues);
+
+		// If creature, 
+		if ( card.type == "creature" ) {
+			// pick a slot
+			let slots_ar = computerPlayer.rack.getEmptySlots();
+			let slot = slots_ar[ Math.floor( Math.random()*slots_ar.length ) ];
+			// Put creature in slot
+			Game.playCreatureCard( card, slot );
+		} else if ( card.type == "spell" ) {
+
+			// Or, if spell,
+
+			// Cast it...
+			Game.playSpellCard( card );
+		}
+
+		
+
+		
+	}
+
+	function fillAIRack(){
+		for ( let s = 0; s < 6; s++ ) {
+			let slot = computerPlayer.rack.slots[s];
+
+			// select creature to play
+			let card = AIPickCreatureToPlay();
+
+			// play card
+			Game.playCreatureCard( card, slot );
+		}
+	}
+	function AIPickCreatureToPlay(){
+		
+		// console.log("computerPlayer.deck: ");
+		// console.log(computerPlayer.deck);
+		let cards = computerPlayer.deck.cards_ar.filter( card => !card.locked && card.type == "creature" );
+		let index = Math.floor( cards.length * Math.random() );
+		let creatureCard = cards[index];
+		return creatureCard;
+	}
+
+
+	
+
+
+
+
+
+	// End Game namespace
+})(this);
+</script>
+</body>
+</html>
