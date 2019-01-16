@@ -18,7 +18,7 @@ html, body {
 	margin: 0;
 }
 body {
-	background-image: url('images/tabletop-tile-tandark.jpg');
+	background-image: url('images/bg-texture-stone.jpg');
 }
 #game-container {
 	/*border: 1px dashed orange;*/
@@ -31,7 +31,7 @@ body {
 #player-card-deck {
 	position: absolute;
 	left: 440px;
-	top: 410px;
+	top: 360px;
 	background: rgba(255, 255, 255, 0.5);
 	border: 2px solid black;
 	box-sizing: border-box;
@@ -124,7 +124,7 @@ body {
 	background-position: center 45%, center;
 	background-repeat: no-repeat, no-repeat;
 	background-size: 90% auto, cover;
-	z-index: 2;
+	/* z-index: 2; */
 	/*transform: rotateY( 0deg );*/
 	/*background-size: contain;*/
 	/*border: 1px solid black;*/
@@ -276,7 +276,7 @@ body {
 .turn-counter {
 	position: absolute;
 	left: 10px;
-	top: 180px;
+	top: 150px;
 	border: 1px solid brown;
 	box-shadow: 0 0 10px black;
 	box-sizing: border-box;
@@ -294,7 +294,7 @@ body {
 <!-- <span style="font-family: sans-serif; font-size: 0.5em; color: #555;" >Tested in webkit</span> -->
 <!-- <img id="layout" src="images/gameplay_spectromancer.jpg" /> -->
 <!-- <div id="layout"></div> -->
-<div id="bg"></div>
+<!-- <div id="bg"></div> -->
 <div id="ai-cards"></div>
 <!-- 
 
@@ -580,10 +580,10 @@ let Game = (function(namespace){
 			this._attributesEl.appendChild(this._hpEl);
 			gameContainer.appendChild(this._shadowEl);
 			gameContainer.appendChild(this.el);
-			TweenMax.set(this.el, { width: cardWidth, height: cardHeight, transform:"translateZ(10px)" });
 			TweenMax.set(this._front, { width: cardWidth, height: cardHeight });
 			TweenMax.set(this._back, { width: cardWidth, height: cardHeight });
 			TweenMax.set(this._shadowEl, { width: cardWidth, height: cardHeight, transform:"translateZ(0px)" });
+			TweenMax.set(this.el, { width: cardWidth, height: cardHeight, transform:"translateZ(10px)" });
 		}
 
 		changeParent ( el ) {
@@ -868,9 +868,9 @@ let Game = (function(namespace){
 			this._portraitImg.src = "images/"+this.portraitSrc;
 			this._elementValues = [1,1,1,1];
 			this._elementNames = [ "supplies", "downtime", "productivity", "incentives" ];
-			this._hp = 50;
-			this.rack = new Rack();
-			this.deck = new Deck();
+			this._hp = 100;
+			this.rack = new Rack( this );
+			this.deck = new Deck( this );
 			// console.log("this.deck: "+this.deck);
 			// console.log(this.deck);
 			// console.log("this.deck.x: "+this.deck.x);
@@ -1077,7 +1077,7 @@ let Game = (function(namespace){
 	//
 	///////////////////////////////
 	class Rack extends GameElement {
-		constructor () {
+		constructor ( player ) {
 			console.log("Rack constructor()");
 			let _myEl = document.createElement("div");
 			super( _myEl );
@@ -1086,14 +1086,14 @@ let Game = (function(namespace){
 			$(this._myEl).addClass("card-rack");
 			this.init();
 			this.assemble();
-
+			this._player = player;
 		}
 
 		init () {
 			this._numSlots = 6;
 			this._slots = [];
 			for ( let i = 0; i < this._numSlots; i++ ) {
-				let slot = new Slot( i );
+				let slot = new Slot( this, i );
 				this._slots.push( slot );
 				this._myEl.appendChild( slot.el );
 				slot.x = i * cardWidth;
@@ -1113,8 +1113,8 @@ let Game = (function(namespace){
 
 			if ( card instanceof Card && slot instanceof Slot ) {
 				slot.card = card;
-				card.x = this._x + slot.x;
-				card.y = this._y + slot.y;
+				// card.x = this._x + slot.x;
+				// card.y = this._y + slot.y;
 			}
 		}
 
@@ -1140,6 +1140,9 @@ let Game = (function(namespace){
 				}
 			}
 			return false;
+		}
+		get player () {
+			return this._player;
 		}
 	}
 
@@ -1184,8 +1187,13 @@ let Game = (function(namespace){
 				this._content = card;
 				if ( card instanceof Card ) {
 					card.mySlot = this;	
+					// put card element inside this slot
+					card.changeParent(this.el);
+					card.x = 0;//this.x + this.rack.x;
+					card.y = 0;//this.y + this.rack.y;
 				}
 				// animate card into this slot
+				
 			}
 		}
 		get index () {
@@ -1398,7 +1406,7 @@ let Game = (function(namespace){
 
 		livePlayer = new HumanPlayer( "Player" );
 		livePlayer.x =  70;
-		livePlayer.y = 290;
+		livePlayer.y = 240;
 		livePlayer.setElement(0, 5);
 		livePlayer.setElement(1, 10);
 		livePlayer.setElement(2, 3);
@@ -1512,7 +1520,24 @@ let Game = (function(namespace){
 		}
 	}
 
-	
+	Game.arrangeRackDepths = function () {
+		// Put attacking Player's rack above defender's
+		let aSlots = Game.activePlayer.rack.slots;
+		let pSlots = Game.passivePlayer.rack.slots;
+		let length = aSlots.length;
+		for ( let a = 0; a < length; a++ ) {
+			if ( pSlots[a].card != undefined ) {
+				pSlots[a].card.el.style.zIndex = 10+length+a;
+				pSlots[a].card.shadow.style.zIndex = 10+a;
+			}
+			if ( aSlots[a].card != undefined ) {
+				aSlots[a].card.el.style.zIndex = 10+length*3+a;
+				aSlots[a].card.shadow.style.zIndex = 10+length*2+a;
+			}
+		}
+		// Game.passivePlayer.rack.el.style.zIndex = "1";
+		// Game.activePlayer.rack.el.style.zIndex = "2";
+	}
 	Game.unlockPlayableCards = function ( player ) {
 
 		// Lock Cards in Deck that are not playable by player's elementValues
@@ -1589,6 +1614,9 @@ let Game = (function(namespace){
 		/*
 			Slot in a rack has been clicked / touched.  Decide what to do with that...
 		*/
+		// If it's HumanPlayer's turn,
+		if ( Game.activePlayer != livePlayer )	return;
+		
 		// IF HumanPlayer has a card selected,
 
 		if ( Game.selectedCard instanceof Card 
@@ -1681,7 +1709,7 @@ let Game = (function(namespace){
 		}
 	}
 	Game.resolveAttacks = function() {
-		
+		Game.arrangeRackDepths();
 		let slotIndexes = [];
 		for ( let s = 0; s < Game.activePlayer.rack.slots.length; s++ ) {
 			// Check each slot for a card
@@ -1790,8 +1818,9 @@ let Game = (function(namespace){
 				let name = names[t]+" "+i;
 				name = name.charAt(0).toUpperCase() + name.slice(1);
 				type = Math.random() < 0.5 ? "creature" : "spell";
+				let atk = type == "creature" ? i : i*2;
 				Game.cards_ar.push( 
-					{ type: type, elementIndex: t, attack: i, defense: i, cost: i, src: "images/sample-image.jpg", name: name, hp: (i+2)*5 }
+					{ type: type, elementIndex: t, attack: atk, defense: i, cost: i, src: "images/sample-image.jpg", name: name, hp: (i+2)*5 }
 				 );
 			}
 		}
@@ -1863,7 +1892,7 @@ let Game = (function(namespace){
 
 	Game.initGame();
 	Game.activePlayer = computerPlayer;
-	// fillAIRack()
+	// fillAIRack();
 	Game.startGame();
 	
 
