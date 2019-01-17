@@ -282,7 +282,7 @@ body {
 	box-sizing: border-box;
 	padding: 0.5em;
 	font-size: 1em;
-	color: white;
+	color: black;
 	font-family: sans-serif;
 	text-align: center;
 }
@@ -519,6 +519,7 @@ let Game = (function(namespace){
 			this.elementIndex = ele;
 			this._slot = null;
 			this._turnCreated = Game.turnNum;
+			this._owner = null;
 			// 
 			let evt = isTouch ? 'touchend' : 'click';
 			$(this.el).on( evt, () => {
@@ -583,7 +584,7 @@ let Game = (function(namespace){
 			TweenMax.set(this._front, { width: cardWidth, height: cardHeight });
 			TweenMax.set(this._back, { width: cardWidth, height: cardHeight });
 			TweenMax.set(this._shadowEl, { width: cardWidth, height: cardHeight, transform:"translateZ(0px)" });
-			TweenMax.set(this.el, { width: cardWidth, height: cardHeight, transform:"translateZ(10px)" });
+			TweenMax.set(this.el, { width: cardWidth, height: cardHeight, transform:"translateZ(2px)" });
 		}
 
 		changeParent ( el ) {
@@ -619,10 +620,10 @@ let Game = (function(namespace){
 
 		kill () {
 			console.log("Card.kill()");
-			console.log("mySlot: "+this.mySlot);
+			console.log("my slot: "+this.slot);
 			$(this._shadowEl).remove();
-			if ( this.mySlot != undefined ) {
-				this.mySlot.card = null;
+			if ( this.slot != undefined ) {
+				this.slot.card = null;
 			}
 			
 			super.kill();
@@ -729,12 +730,22 @@ let Game = (function(namespace){
 		get locked () {
 			return this._locked;
 		}
-		set mySlot ( value ) {
+
+		set owner ( value ) {
+			if ( value instanceof Player ) {
+				this._owner = value;
+			}
+		}
+		get owner () {
+			return this._owner;
+		}
+
+		set slot ( value ) {
 			if ( value instanceof Slot ){
 				this._slot = value;	
 			}
 		}
-		get mySlot () {
+		get slot () {
 			return this._slot;
 		}
 
@@ -1186,7 +1197,7 @@ let Game = (function(namespace){
 			if ( card instanceof Card || card == undefined ) {
 				this._content = card;
 				if ( card instanceof Card ) {
-					card.mySlot = this;	
+					card.slot = this;	
 					// put card element inside this slot
 					card.changeParent(this.el);
 					card.x = 0;//this.x + this.rack.x;
@@ -2010,7 +2021,98 @@ let Game = (function(namespace){
 		return creatureCard;
 	}
 
+/*
+Game.checkCreatureEvents = function( turnPhase ) {
 
+			let ownerCreatures = [],
+				opponentCreatures = [];
+			// For each ActivePlayer's creature
+			for ( let s = 0; s < Game.activePlayer.rack.slots.length; s++ ) {
+				let slot = Game.activePlayer.rack.slots[s];
+				if ( slot.card != undefined ) {
+					ownerCreatures.push( slot.card );
+				}
+			}
+			// For each PassivePlayer's creature
+			for ( let s = 0; s < Game.passivePlayer.rack.slots.length; s++ ) {
+				let slot = Game.passivePlayer.rack.slots[s];
+				if ( slot.card != undefined ) {
+					opponentCreatures.push( slot.card );
+				}
+			}
+
+			let card = slot.card
+
+			// Check card for special events
+			if ( card.special != undefined && card.special.event == turnPhase ) {
+				if ( card.damage > 0 ) {
+					switch (card.special.target) {
+						case "owner":
+							card.owner.takeDamage( card.special.damage );
+							break;
+						case "owner-creatures-all":
+							// Get card's slot index
+							let index = card.slot.index;
+							if ( index > 0 ) {
+								// Get slot to left
+								let leftSlot = card.slot.rack.slots[ index -1 ];
+								if ( leftSlot.card != undefined ) {
+									leftSlot.card.takeDamage( card.special.damage );
+								}
+							}
+							if ( index < card.slot.rack.slots.length -1 ) {
+								// Check Slot to right
+								let rightSlot = card.slot.rack.slots[ card.slot.index + 1];
+								if ( rightSlot.card != undefined ) {
+									rightSlot.card.takeDamage( card.special.damage );
+								}
+							}
+							
+							break;
+						case "owner-creatures-neighbors":
+
+							break;
+						case "opponent":
+
+							break;
+						case "opponent-creatures-all":
+
+							break;
+						case "opponent-creature-across":
+
+							break;
+						case "creature-self":
+
+						default:
+
+
+					}
+				}
+			}
+		}
+		*/
+			/*
+		SPECIAL
+			EVENTS
+				"summon"
+				"die"
+				"owner-turn-start"
+				"owner-turn-end"
+				"opponent-turn-start"
+				"opponent-turn-end"
+			ACTIONS
+				"heal"
+				"damage"
+				"element-powers"
+			TARGET
+				"owner"
+				"owner-creatures-all"
+				"owner-creatures-neighbors"
+				"opponent"
+				"opponent-creatures-all"
+				"opponent-creature-across"
+				"creature-self"
+*/
 	
 
 
