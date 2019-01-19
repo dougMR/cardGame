@@ -1,0 +1,412 @@
+
+
+var cards_dataObj = { "elements" : [
+	 {"name" : "fire", "cards" : [
+		{ 
+		"name" : "Goblin Berserker",
+		"element" : "fire",
+		"type" : "creature",
+		"attack" : 4,
+		"life" : 16,
+		"cost" : 1,
+		"specials" : [
+			{
+				"event" : "owner-turn-start",
+				"target" : "neighbors",
+				"effect" : "hp",
+				"amount" : -2,
+			}]
+		},
+		{
+			"name" : "Wall of Fire",
+			"element" : "fire",
+			"type" : "creature",
+			"attack" : 0,
+			"life" : 5,
+			"cost" : 2,
+			"specials" : [{
+				"event" : "summon",
+				"target" : "opponent-creatures",
+				"effect" : "hp",
+				"amount" : -5
+			}]
+		},
+		{
+			"name" : "Printer / Copier",
+			"element" : "fire",
+			"type" : "creature",
+			"attack" : 8,
+			"life" : 32,
+			"cost" : 9,
+			"specials" : [
+				{
+					"event" : "summon",
+					"target" : "owner",
+					"effect" : "powers",
+					"amount" : [1,1,1,1]
+				},
+				{
+					"event" : "die",
+					"target" : "opponent",
+					"effect" : "powers",
+					"amount" : [-1,-1,-1,-1]
+				}]
+		},
+		{
+			"name" : "Paper Clip",
+			"element" : "supplies",
+			"type" : "creature",
+			"attack" : 3,
+			"life" : 12,
+			"cost" : 1,
+			"specials" : [
+			{
+				"event" : "owner-turn-start",
+				"target" : "neighbors",
+				"effect" : "hp",
+				"amount" : -2
+			},
+			{
+				"event" : "summon",
+				"target" : "owner",
+				"effect" : "hp",
+				"amount" : 2
+			},
+			{
+				"event" : "die",
+				"target" : "owner",
+				"effect" : "element-powers",
+				"amount" : [1,1,1,1]
+			}]
+		}
+	]},
+	 { "name" : "water", "cards" : [] }
+]}
+		
+
+		
+
+/*
+FIRE CARDS
+
+Goblin Berserker
+Fire creature, cost 1
+Attack 4, life 16
+At the beginning of its owners turn,
+Goblin Berserker deals 2 damage
+to its neighboring creatures.
+
+Wall of Fire
+Fire creature, cost 2
+Attack 0, life 5
+When Wall of Fire is summoned
+it deals 5 damage to each of
+the opponent's creatures.
+
+Priest of Fire
+Fire creature, cost 3
+Attack 3, life 13
+Priest of Fire increases the growth
+of its owner's Fire power by 1.
+
+Fire Drake
+Fire creature, cost 4
+Attack 4, life 18
+Fire Drake attacks the turn
+it enters play.
+
+Orc Chieftain
+Fire creature, cost 5
+Attack 3, life 17
+Orc Chieftan increases the attack
+of its neighboring creatures by 2
+(except walls).
+
+Flame Wave
+Fire spell, cost 6
+Flame Wave deals 9 damage to each
+of the opponent's creatures.
+
+Minotaur Commander
+Fire creature, cost 7
+Attack 6, life 20
+Minotaur Commander increases by 1
+the attack of all other owner's creatures
+(except walls).
+
+Bargul
+Fire creature, cost 8
+Attack 8, life 26
+When Bargul is summoned it deals
+4 damage to each other creature.
+
+Inferno
+Fire spell, cost 9
+Inferno deals 18 damage to target
+opponent's creature and 10 damage to
+each of the opponent's other creatures.
+
+Fire Elemental
+Fire creature, cost 10, attack is equal
+to its owner's Fire power, life 37'+'
+When Fire Elemental is summoned
+it deals 3 damage to the opponent
+and to each of the opponent's creatures.
+Fire Elemental increases the growth
+of its owner's Fire power by 1.
+
+Armageddon
+Fire spell, cost 11
+Armageddon deals
+(8 + its caster's Fire power) damage
+to the opponent and to each creature.
+
+Dragon
+Fire creature, cost 12
+Attack 9, life 40
+Dragon increases the damage
+its owner's spells deal by 50%
+(total damage will be rounded up).
+
+
+WATER CARDS
+
+Meditation
+Water spell, cost 1
+Meditation increases its caster's
+Fire, Air and Earth powers by 1.	
+
+Sea Sprite
+Water creature, cost 2
+Attack 5, life 22
+At the beginning of its owner's turn,
+Sea Sprite deals 2 damage to its owner.
+
+Merfolk Apostate
+Water creature, cost 3
+Attack 3, life 10
+When Merfolk Apostate is summoned
+it increases its owner's Fire power by 2.	
+
+Ice Golem
+Water creature, cost 4
+Attack 4, life 12
+Ice Golem receives no damage
+from spells and abilites.
+
+Merfolk Elder
+Water creature, cost 5
+Attack 3, life 16
+Merfolk Elder increases the growth
+of its owner's Air power by 1.	
+
+Ice Guard
+Water creature, cost 6
+Attack 3, life 20
+Ice Guard reduces all damage
+dealt to its owner by 50%
+(total damage will be rounded up).
+
+Giant Turtle
+Water creature, cost 7
+Attack 5, life 16
+Damage dealt to Giant Turtle
+is reduced by 5.	
+	
+Acidic Rain
+Water spell, cost 8
+Acidic Rain deals 15 damage to each
+creature, then decreases each
+of the opponent's powers by 1.
+
+Merfolk Overlord
+Water creature, cost 9
+Attack 7, life 35
+Merfolk Overlord allows creatures
+in its neighboring slots to attack
+the turn they enter play.	
+
+Water Elemental
+Water creature, cost 10, attack is equal
+to its owner's Water power, life 37
+When Water Elemental is summoned
+it heals 10 life to its owner.
+Water Elemental increases the growth
+of its owner's Water power by 1.
+
+Mind Master
+Water creature, cost 11
+Attack 6, life 23
+Mind Master increases the growth
+of each of its owner's powers by 1.	
+
+Astral Guard
+Water creature, cost 12
+Attack 1, life 18
+Astral Guard decreases the growth
+of each of the opponent's powers by 1.
+
+
+AIR CARDS
+
+Faerie Apprentice
+Air creature, cost 1
+Attack 4, life 12
+Faerie Apprentice increases the damage
+its owner's spells deal by 1.	
+
+Griffin
+Air creature, cost 2
+Attack 3, life 15
+When Griffin is summoned,
+if its owner's Air power is 5 or more,
+it deals 5 damage to the opponent.
+
+Call to Thunder
+Air spell, cost 3
+Call to Thunder deals 6 damage
+to target opponent's creature
+and 6 damage to the opponent.	
+
+Faerie Sage
+Air creature, cost 4
+Attack 4, life 19
+When Faerie Sage is summoned
+it heals an amount of life to its owner
+equal to its owner's Earth power,
+but not more than 10.
+
+Wall of Lightning
+Air creature, cost 5
+Attack 0, life 28
+At the beginning of its owner's turn,
+Wall of Lightning deals 4 damage
+to the opponent.	
+	
+Lightning Bolt
+Air spell, cost 6
+Lightning Bolt deals
+(5+its caster's Air power) damage
+to the opponent.
+
+Phoenix
+Air creature, cost 7
+Attack 7, life 16
+Each time Phoenix dies, if its owner's
+Fire power is 10 or greater, it rebirths
+(another Phoenix is put into the same slot).
+Phoenix cannot rebirth if a card
+says that it is "destroyed".	
+	
+Chain Lightning
+Air spell, cost 8
+Chain Lightning deals 9 damage
+to the opponent and to each
+of the opponent's creatures.
+
+Lightning Cloud
+Air creature, cost 9
+Attack 4, life 20
+Lightning Cloud's attack damages
+the opponent and each of
+the opponent's creatures.	
+	
+Tornado
+Air spell, cost 10
+Destroy target opponent's creature.
+
+Air Elemental
+Air creature, cost 11, attack is equal
+to its owner's Air power, life 44
+When Air Elemental is summoned
+it deals 8 damage to the opponent.
+Air Elemental increases the growth
+of its owner's Air power by 1.	
+
+Titan
+Air creature, cost 12
+Attack 9, life 40
+When Titan is summoned
+it deals 15 damage to the creature
+in the opposing slot.
+
+
+EARTH CARDS
+
+Elven Healer
+Earth creature, cost 1
+Attack 2, life 12
+At the beginning of its owner's turn,
+Elvish Healer heals 3 life to its owner.	
+	
+Nature's Ritual
+Earth spell, cost 2
+Nature's Ritual heals 8 life
+to target caster's creature
+and to its caster.
+
+Forest Sprite
+Earth creature, cost 3
+Attack 1, life 22
+Forest Sprite's attack damages
+the opponent and each of
+the opponent's creatures.	
+	
+Rejuvenation
+Earth spell, cost 4
+Rejuvenation heals an amount of life
+to its caster equal to twice
+its caster's Earth power.
+
+Elf Hermit
+Earth creature, cost 5
+Attack 1, life 13
+Elf Hermit increases the growth
+of its owner's Earth power by 2.	
+	
+Nature's Fury
+Earth spell, cost 6
+Nature's Fury deals an amount of damage
+to the opponent equal to the total
+attack of its caster's two creatures
+with the highest attack.
+
+Giant Spider
+Earth creature, cost 7
+Attack 4, life 24
+When Giant Spider is summoned,
+it puts a 2/11 Forest Spider into
+each of its empty neighboring slots.	
+
+Troll
+Earth creature, cost 8
+Attack 6, life 26
+At the beginning of its owner's turn,
+Troll heals 4 life to itself.
+
+Stone Rain
+Earth spell, cost 9
+Stone Rain deals 25 damage
+to each creature.	
+
+Earth Elemental
+Earth creature, cost 10, attack is equal
+to its owner's Earth power, life 50
+Earth Elemental increases the growth
+of its owner's Earth power by 1.
+
+Master Healer
+Earth creature, cost 11
+Attack 3, life 34
+At the beginning of its owner's turn,
+Master Healer heals 3 life to its owner
+and to each of its owner's creatures.	
+
+Hydra
+Earth creature, cost 12
+Attack 3, life 40
+Hydra's attack damages the opponent
+and each of the opponent's creatures.
+At the beginning of its owner's turn,
+Hydra heals 4 life to itself.
+*/

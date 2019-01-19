@@ -10,6 +10,7 @@
 
 <script src="libs/jquery-2.1.0.js"></script>
 <script src="libs/TweenMax.min.js"></script>
+<script type="text/javascript" src="data/cards.json"></script>
 
 <style>
 html, body {
@@ -474,7 +475,6 @@ let Game = (function(namespace){
 
 		For Spells:
 
-
 		// Does the spell operate automatically?
 
 			// on the Active player?
@@ -492,7 +492,7 @@ let Game = (function(namespace){
 			// Opponent's card?
 		*/
 
-		constructor ( ele, atk, def, hp, cost, img, tit, type ) {
+		constructor ( ele, atk, def, hp, cost, img, tit, type, specials ) {
 			// console.log('Card constructor('+ele+', '+atk+', '+def+', '+cost+', '+img+', '+tit+', '+hp+')');
 			let _el = document.createElement("div");
 			super( _el );
@@ -510,7 +510,7 @@ let Game = (function(namespace){
 			this._title = tit != undefined ? " "+tit : "...";	
 			this._specials = {},
 			this._shadowEl = document.createElement("div");
-			this._hp = hp;
+			this._hp = this._maxhp = hp;
 			this._locked = false;
 			this.assemble();
 			this.attack = atk;
@@ -518,7 +518,7 @@ let Game = (function(namespace){
 			this.cost = cost;
 			this.elementIndex = ele;
 			this._slot = null;
-			this._turnCreated = Game.turnNum;
+			this._turnPlayed = Game.turnNum;
 			this._owner = null;
 			// 
 			let evt = isTouch ? 'touchend' : 'click';
@@ -612,9 +612,6 @@ let Game = (function(namespace){
 		 	console.log("Card.takeDamage( "+value+" )");
 		 	if ( value != undefined ) {
 		 		this.hp -= value;
-		 		if ( this.hp <= 0 ) {
-		 			this.kill();
-		 		}
 		 	}
 		 }
 
@@ -785,8 +782,11 @@ let Game = (function(namespace){
 
 	 	set hp ( value ) {
 	 		if ( value != undefined ) {
-	 			this._hp = value;
+	 			this._hp = Math.min( value, this._maxhp );
 	 			this.update();
+				if ( this.hp <= 0 ) {
+		 			this.kill();
+		 		}
 	 		}
 	 	}
 	 	get hp () {
@@ -834,8 +834,8 @@ let Game = (function(namespace){
 			}
 		}
 
-		get turnCreated () {
-			return this._turnCreated;
+		get turnPlayed () {
+			return this._turnPlayed;
 		}
 	}
 
@@ -939,9 +939,7 @@ let Game = (function(namespace){
 		subtractFromElement ( index, value ) {
 			console.log("Player.subtractFromElement( "+index+", "+value+")");
 			if ( index === Number.parseInt( index, 10 ) && typeof value === "number" ) {
-				console.log("value: "+this.getElement(index));
 				this.setElement( index, this.getElement( index ) - value );
-				console.log("new value: "+this.getElement(index));
 			}
 		}
 		addToElement ( index, value ) {
@@ -1124,6 +1122,7 @@ let Game = (function(namespace){
 
 			if ( card instanceof Card && slot instanceof Slot ) {
 				slot.card = card;
+				card.owner = this.player;
 				// card.x = this._x + slot.x;
 				// card.y = this._y + slot.y;
 			}
@@ -1234,7 +1233,7 @@ let Game = (function(namespace){
 		Deck is 4x4 - 4 elements, 4 levels (cost) per element
 	*/
 	class Deck extends GameElement {
-		constructor () {
+		constructor ( player ) {
 			console.log("Deck constructor()");
 			let _el = document.createElement("div");
 			super(_el);
@@ -1242,7 +1241,7 @@ let Game = (function(namespace){
 			// $(this.el).addClass( "card-deck" );
 			this._cards_ar = [];
 			this.init();
-
+			this._player = player;
 		}
 
 		init () {
@@ -1321,6 +1320,9 @@ let Game = (function(namespace){
 				this._cards_ar[c].lock();
 			}
 		}
+		get player () {
+			return this._player;
+		}
 
 		get cards_ar () {
 			return this._cards_ar;
@@ -1384,6 +1386,7 @@ let Game = (function(namespace){
 
 	Game.turnNum = 0;
 	Game.turnPhase = 0; // 0 = human, 1 = AI
+	Game.turnPhasePortion = ""; // "start", "end"
 	Game.activePlayer = null;
 	Game.passivePlayer = null;
 	Game.selectedCard = null;
@@ -1436,6 +1439,12 @@ let Game = (function(namespace){
 		let wait = setTimeout( Game.startTurn, 2500 );
 		
 	}
+
+	/////////////////////////////////////////////////
+	//
+	//			GAME TURN PARTS
+	//
+	/////////////////////////////////////////////////
 	Game.startTurn = function () {
 		console.log("Game.startTurn()");
 		if ( Game.gameOver ) return;
@@ -1460,6 +1469,7 @@ let Game = (function(namespace){
 		// Add Element points (+1 default)
 		Game.updatePlayerElementPoints();
 		Game.unlockPlayableCards( Game.activePlayer );
+		Game.turnPhasePortion = "start";
 		if ( Game.turnPhase === 0 ) {
 			Game.startHumanPhase();
 		} else if ( Game.turnPhase === 1 ) {
@@ -1487,6 +1497,8 @@ let Game = (function(namespace){
 		// Decrease host element power
 		// Decrease enemy element power
 		// Game.resolveAttacks();
+		Game.turnPhasePortion = "end";
+		// Check Cards Specials
 		Game.turnPhase ++;
 
 		if ( Game.turnPhase >= 2 ) {
@@ -1531,53 +1543,15 @@ let Game = (function(namespace){
 		}
 	}
 
-	Game.arrangeRackDepths = function () {
-		// Put attacking Player's rack above defender's
-		let aSlots = Game.activePlayer.rack.slots;
-		let pSlots = Game.passivePlayer.rack.slots;
-		let length = aSlots.length;
-		for ( let a = 0; a < length; a++ ) {
-			if ( pSlots[a].card != undefined ) {
-				pSlots[a].card.el.style.zIndex = 10+length+a;
-				pSlots[a].card.shadow.style.zIndex = 10+a;
-			}
-			if ( aSlots[a].card != undefined ) {
-				aSlots[a].card.el.style.zIndex = 10+length*3+a;
-				aSlots[a].card.shadow.style.zIndex = 10+length*2+a;
-			}
-		}
-		// Game.passivePlayer.rack.el.style.zIndex = "1";
-		// Game.activePlayer.rack.el.style.zIndex = "2";
-	}
-	Game.unlockPlayableCards = function ( player ) {
 
-		// Lock Cards in Deck that are not playable by player's elementValues
-
-		let deck = player.deck.cards_ar;
-
-		let elementValues = player.elementValues;
-
-		// For each element, lock/unlock cards of that element which player can afford
-		for ( let e = 0; e < elementValues.length; e++ ) {
-			let elementIndex = e;
-			let elementValue = elementValues[e];
-			for ( let c = 0; c < deck.length; c++ ) {
-				let card = deck[c];
-
-				// If all Player Slots are filled, only Spell cards are eligible for unlocking
-				if ( card.elementIndex === elementIndex ) {
-					if ( card.cost > elementValue || ( !player.rack.slotAvailable && card.type === "creature" ) ) {
-						card.lock();
-					} else {
-						card.unlock();
-					}
-				}
-			}
-		}
-	}
+	
 
 
-
+	/////////////////////////////////////////////////
+	//
+	//			GAME TURN ACTIONS
+	//
+	/////////////////////////////////////////////////
 
 	Game.selectCard = function( whichCard ) {
 		console.log("Game.selectCard()");
@@ -1645,24 +1619,6 @@ let Game = (function(namespace){
 			Game.resolveAttacks();
 		}
 	}
-	Game.duplicateCard = function ( card ) {
-		// Duplicate that card
-		let dupCard = new Card(
-		card.elementIndex,
-		card.attack,
-		card.defense,
-		card.hp,
-		card.cost,
-		card.img,
-		card.title,
-		card.type);
-		// Place face up on top of original card
-		dupCard.x = card.x;
-		dupCard.y = card.y;
-		dupCard.flip( true );
-		
-		return dupCard;
-	}
 	
 	
 	Game.playSpellCard = function ( card ) {
@@ -1706,11 +1662,7 @@ let Game = (function(namespace){
 	}
 
 	Game.chargePlayerForCard = function( card ) {
-		console.log("Game.chargePlayerForCard()");
-		console.log("card: ");
-		console.log(card);
-		console.log("Game.activePlayer.getElement("+card.elementIndex+")");
-		console.log(Game.activePlayer.getElement(card.elementIndex));
+		// console.log("Game.chargePlayerForCard()");
 		Game.activePlayer.subtractFromElement( card.elementIndex, card.cost );
 	}
 	Game.updatePlayerElementPoints = function () {
@@ -1725,7 +1677,7 @@ let Game = (function(namespace){
 		for ( let s = 0; s < Game.activePlayer.rack.slots.length; s++ ) {
 			// Check each slot for a card
 			let card = Game.activePlayer.rack.slots[s].card;
-			if ( card != undefined && card.turnCreated < Game.turnNum ) {
+			if ( card != undefined && card.turnPlayed < Game.turnNum ) {
 				// Cards by default can't attack on the same turn that they are played
 				slotIndexes.push( s );
 			}
@@ -1759,10 +1711,6 @@ let Game = (function(namespace){
 		console.log("...executing Game.cardAttack()");
 		let card = Game.activePlayer.rack.slots[ slotIndex ].card;
 		let defenderCard = Game.passivePlayer.rack.slots[ slotIndex ].card;
-		// console.log("defenderCard: ");
-		// console.log(defenderCard);
-		// console.log("attackCard: ");
-		// console.log(card);
 		if ( card != undefined ) {
 			// Animate card
 			let dur = 0.5,
@@ -1798,6 +1746,52 @@ let Game = (function(namespace){
 
 
 
+	/////////////////////////////////////////////////
+	//
+	//			GAME UTILITY FUNCTIONS
+	//
+	/////////////////////////////////////////////////
+
+	Game.arrangeRackDepths = function () {
+		// Put attacking Player's rack above defender's
+		let aSlots = Game.activePlayer.rack.slots;
+		let pSlots = Game.passivePlayer.rack.slots;
+		let length = aSlots.length;
+		for ( let a = 0; a < length; a++ ) {
+			if ( pSlots[a].card != undefined ) {
+				pSlots[a].card.el.style.zIndex = 10+length+a;
+				pSlots[a].card.shadow.style.zIndex = 10+a;
+			}
+			if ( aSlots[a].card != undefined ) {
+				aSlots[a].card.el.style.zIndex = 10+length*3+a;
+				aSlots[a].card.shadow.style.zIndex = 10+length*2+a;
+			}
+		}
+		// Game.passivePlayer.rack.el.style.zIndex = "1";
+		// Game.activePlayer.rack.el.style.zIndex = "2";
+	}
+
+	Game.duplicateCard = function ( card ) {
+		// Duplicate that card
+		let dupCard = new Card(
+		card.elementIndex,
+		card.attack,
+		card.defense,
+		card.hp,
+		card.cost,
+		card.img,
+		card.title,
+		card.type);
+		// Place face up on top of original card
+		dupCard.x = card.x;
+		dupCard.y = card.y;
+		dupCard.flip( true );
+		
+		return dupCard;
+	}
+
+
+
 	Game.positionElement = function( el, x, y ) {
 		$(el).css({top: y, left: x});
 	}
@@ -1814,11 +1808,15 @@ let Game = (function(namespace){
 
 	/////////////////////////////////////////////////
 	//
-	//			BUILD GAME DECK (Master Deck)
+	//			BUILD and manage GAME DECK (Master Deck)
 	//
 	/////////////////////////////////////////////////
 
 	Game.cards_ar = [];
+
+	Game.buildSourceDeckFromData = function ( data ) {
+		
+	}
 	// TEMP GENERATE ARTIFICIAL CARD TYPES:
 	// ALL CARDS
 	Game.createTempCardSet = function () {
@@ -1871,12 +1869,36 @@ let Game = (function(namespace){
 		return Game.makeCardByName( name );
 	}
 
-	Game.GUIanimatePoints = function( points, el ) {
+	Game.GUIanimatePoints = function ( points, el ) {
 		let pointsEl = document.createElement("span");
 		let sign = points > 0 ? "positive" : "negative";		
 		pointsEl.className = "points-field "+sign;
+	}
+	Game.unlockPlayableCards = function ( player ) {
 
+		// Lock Cards in Deck that are not playable by player's elementValues
 
+		let deck = player.deck.cards_ar;
+
+		let elementValues = player.elementValues;
+
+		// For each element, lock/unlock cards of that element which player can afford
+		for ( let e = 0; e < elementValues.length; e++ ) {
+			let elementIndex = e;
+			let elementValue = elementValues[e];
+			for ( let c = 0; c < deck.length; c++ ) {
+				let card = deck[c];
+
+				// If all Player Slots are filled, only Spell cards are eligible for unlocking
+				if ( card.elementIndex === elementIndex ) {
+					if ( card.cost > elementValue || ( !player.rack.slotAvailable && card.type === "creature" ) ) {
+						card.lock();
+					} else {
+						card.unlock();
+					}
+				}
+			}
+		}
 	}
 
 
@@ -2000,7 +2022,7 @@ let Game = (function(namespace){
 		
 	}
 
-	function fillAIRack(){
+	function fillAIRack () {
 		for ( let s = 0; s < 6; s++ ) {
 			let slot = computerPlayer.rack.slots[s];
 
