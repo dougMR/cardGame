@@ -1394,7 +1394,8 @@ let Game = (function(namespace){
 
 	Game.initGame = function() {
 		console.log("Game.initGame()");
-		Game.createTempCardSet();
+		// Game.createTempCardSet();
+		Game.buildSourceDeckFromData( cards_dataObj );
 		// -----------------------------------------------
 		// Make Players, Human and AI
 		// -----------------------------------------------
@@ -1814,8 +1815,45 @@ let Game = (function(namespace){
 
 	Game.cards_ar = [];
 
-	Game.buildSourceDeckFromData = function ( data ) {
-		
+	/*
+	{"name" : "fire", "cards" : [
+		{ 
+		"name" : "Goblin Berserker",
+		"element" : "fire",
+		"type" : "creature",
+		"attack" : 4,
+		"life" : 16,
+		"cost" : 1,
+		"specials" : [
+			{
+				"event" : "owner-turn-start",
+				"target" : "neighbors",
+				"effect" : "hp",
+				"amount" : -2,
+			}]
+		}
+	*/
+
+	Game.buildSourceDeckFromData = function ( dataObj ) {
+		for ( let e = 0; e < dataObj.elements.length; e++ ) {
+			let element = dataObj.elements[e];
+			for ( let c = 0; c < element.cards.length; c++ ) {
+				let card = element.cards[c];
+				let def = card.defense != undefined ? card.defense : 0;
+				Game.cards_ar.push( 
+					{ type : card.type, 
+					elementIndex : e, 
+					attack : card.attack, 
+					defense : def, 
+					cost : card.cost, 
+					src : "images/sample-image.jpg", 
+					name : card.name, 
+					hp : card.life,
+					specials : card.specials
+					 }
+				 );
+			}
+		}
 	}
 	// TEMP GENERATE ARTIFICIAL CARD TYPES:
 	// ALL CARDS
@@ -1865,8 +1903,12 @@ let Game = (function(namespace){
 		elegibleCards_ar = Game.cards_ar.filter( meetsCriteria );
 		// then randomly pick one.
 		let index = Math.floor( Math.random()*(elegibleCards_ar.length-1) );
-		let name = elegibleCards_ar[ index ].name;
-		return Game.makeCardByName( name );
+		console.log("index: "+index);
+		if ( index != -1 ) {
+			let name = elegibleCards_ar[ index ].name;
+			return Game.makeCardByName( name );
+		}
+		
 	}
 
 	Game.GUIanimatePoints = function ( points, el ) {
