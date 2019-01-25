@@ -178,7 +178,7 @@ var cards_dataObj = { "elements" : [
 				"event" : "cast",
 				"target" : "all-creatures",
 				"effect" : "hp",
-				"amount" : -(8 + owner fire power)
+				"amount" : "formula:-(8 + owner fire power)"
 			},
 			{
 				"event" : "cast",
@@ -254,7 +254,7 @@ var cards_dataObj = { "elements" : [
 		{
 			"name" : "Ice Golem",
 			"element" : "water",
-			"type" : "creatur",
+			"type" : "creature",
 			"attack" : 4,
 			"life" : 12,
 			"cost" : 4,
@@ -698,7 +698,7 @@ var cards_dataObj = { "elements" : [
 				"event" : "summon",
 				"target" : "neighbor-slots",
 				"effect" : "summon-Forest Spider",
-				"amount" : 
+				"amount" : 0
 			}],
 			"description" : "When Giant Spider is summoned, it puts a 2/11 Forest Spider into each of its empty neighboring slots."
 		},{
@@ -712,7 +712,7 @@ var cards_dataObj = { "elements" : [
 				"event" : "",
 				"target" : "",
 				"effect" : "",
-				"amount" : 
+				"amount" : 0
 			}],
 			"description" : ""
 		},{

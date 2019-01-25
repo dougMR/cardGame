@@ -1253,8 +1253,8 @@ let Game = (function(namespace){
 			// col = element-index, row = power (cost-range)
 			for( let col = 0; col < 4; col++ ) {
 				for( let row = 0; row < 4; row++ ) {
-					// pick a cost from range -> 0-2, 3-5, 6-8, 9-11
-					let cost = row * 3 + Math.floor( Math.random() * 3 );
+					// pick a cost from range -> 1-3, 4-6, 7-9, 10-12
+					let cost = row * 3 + Math.floor( Math.random() * 3 ) + 1;
 					let card = Game.pickCard( col, cost );
 					// $(card.el).detach();
 					// $(this.el).append(card.el);
@@ -1878,7 +1878,7 @@ let Game = (function(namespace){
 	}
 	
 	Game.makeCardByName = function ( name ) {
-		// console.log("makeCardByType( "+type+" )")
+		console.log("makeCardByName( "+name+" )")
 		let cards = Game.cards_ar.filter( card => card.name == name );
 		let card = cards[0]; // There is only 1 card of each name
 		/*
@@ -1900,7 +1900,7 @@ let Game = (function(namespace){
 		
 		//	Select from the full card set, Game.cards_ar, a card of specified element type and cost 
 		
-		function meetsCriteria(card){
+		function meetsCriteria ( card ) {
 			return card.elementIndex == elementIndex && card.cost == cost;
 		}
 		// create array of all cards that match the criteria.
@@ -1908,6 +1908,9 @@ let Game = (function(namespace){
 		// then randomly pick one.
 		let index = Math.floor( Math.random()*(elegibleCards_ar.length-1) );
 		console.log("index: "+index);
+		if ( index == -1 ) {
+			console.log( "tried to pickCard (elementIndex,cost): "+elementIndex+", "+cost);
+		}
 		if ( index != -1 ) {
 			let name = elegibleCards_ar[ index ].name;
 			return Game.makeCardByName( name );
