@@ -519,6 +519,10 @@ let Game = (function(namespace){
 			this.elementIndex = ele;
 			this._slot = null;
 			this._turnPlayed = Game.turnNum;
+			// HACK !!!
+			if ( this.title === "Fire Drake" ) {
+				this._turnPlayed--;
+			}
 			this._owner = null;
 			// 
 			let evt = isTouch ? 'touchend' : 'click';
@@ -1945,6 +1949,202 @@ let Game = (function(namespace){
 
 
 
+	/////////////////////////////////////////////////
+	//
+	//			v Dev stuff for SPECIALS v
+	//
+	/////////////////////////////////////////////////
+
+
+	Game.checkLiveCardsForSpecials = function () {
+		// Look at every card in both racks
+		let activeCards = Game.getAllCardsInRack( Game.activePlayer.rack );
+		let passiveCards = Game.getAllCardsInRack( Game.passivePlayer.rack );
+		let allCards = activeCards.concat(passiveCards);
+		// For each of those cards, 
+		for ( let a = 0; a < allCards.length; a++ ) {
+			let activeCard = allCards[a];
+			let specials = activeCard.specials;
+			// Look through all its specials
+			for ( let s = 0; s < specials.length; s++ ) {
+				let special = specials[s];
+				// If a special's event type is current
+				console.log("event: "+special.event);
+				console.log("player: "+activeCard.player);
+				console.log(Game.isTimeForEvent( special.event, activeCard ));
+				if ( Game.isTimeForEvent( special.event, activeCard ) ) {
+					// Execute that special
+					Game.executeSpecial( activeCard, special );
+					console.log("Time For Special: "+activeCard.specials.event);
+				}
+			}
+		}
+	}
+
+	Game.getCardSpecialsOfType = function ( card, eventType ) {
+		let specials = [];
+		for ( let s = 0; s < card.specials.length; s++ ) {
+			let special = card.specials[ s ];
+			// check if that special has correct event type
+			if ( special.event === eventType ) {
+				specials.push( special );
+			}
+		}
+		return specials;
+	}
+
+	Game.checkDyingCardForSpecial = function ( card ) {
+		// Call this when a card dies.
+		// Does this card have a special of event "die"?
+		let specials = Game.getCardSpecialsOfType( card, "die" );
+		
+		if ( specials.length > 0 ) {
+			// execute those specials...
+			for ( let s = 0; s < specials.length; s++ ) {
+				let special = specials[ s ];
+				// Execute that special
+				Game.executeSpecial( card, special );
+			}
+		}
+	}
+
+	Game.executeSpecial = function ( card, special ) {
+		// Execute that special
+		let targets = Game.getTargetsOfSpecial( card, special );
+
+		for ( let t = 0; t < targets.length; t++ ) {
+			if ( special.effect = "hp" ) {
+				// modify each hp
+				if ( targets[t] == undefined || targets[t].hp == undefined ) {
+					console.log("target...");
+					console.log(targets[t]);
+				}
+				targets[t].hp += special.amount;
+			} else if ( special.effect === "powers" ){
+				// add to each power
+				for ( let p = 0; p < special.amount.length; p++ ) {
+					target.addToElement ( p, special.amount[p] )
+				}
+			}
+		}
+	}
+
+
+	Game.getTargetsOfSpecial = function ( card, special ) {
+		let targets = [];
+		let owner = card.player;
+		let opponent = owner === Game.activePlayer ? Game.passivePlayer : Game.activePlayer;
+		// find target(s)
+		console.log("special.target: "+special.target);
+		switch ( special.target ) {
+			case "owner":
+			// Get Game.activePlayer
+				targets.push(owner);
+				break;
+			case "opponent":
+			// Get Game.passivePlayer
+				targets.push(opponent);
+				break;
+			case "owner-creatures":
+			// All cards_data in Owner's rack
+			console.log("owner: "+owner);
+				targets.push( Game.getAllCardsInRack( owner.rack, card ) );
+				break;
+			case "opponent-creatures":
+			// All cards_data in Opponent's rack
+				targets.push( Game.getAllCardsInRack( opponent.rack ) );
+				break;
+			case "neighbors":
+			// Cards to left/right of this card
+				targets.push( Game.getCardNeighbors( card ) );
+				break;
+			case "across":
+			// Card in same slot index of opponent's rack
+				let acrossCard = Game.getCardAcross( card );
+				if ( acrossCard != undefined ) {
+					targets.push( acrossCard );
+				}
+				break;
+			case "self":
+			// This card
+				targets.push( card );
+				break;
+			default:
+		}
+		return targets;
+	}
+
+	Game.getAllCardsInRack = function( rack, excludeCard ) {
+		let cards = [];
+		for ( let s = 0; s < rack.slots.length; s++ ) {
+			let card = rack.slots[s].card;
+			// if ( card instanceof Card && card != excludedCard ) {
+				cards.push( card );
+			// }
+		}
+		return cards;
+	}
+
+	Game.getCardNeighbors = function ( card ) {
+		let cards = [];
+		// Get card's slot index
+		let index = card.slot.index;
+		if ( index > 0 ) {
+			// Get slot to left
+			let leftSlot = card.slot.rack.slots[ index -1 ];
+			if ( leftSlot.card != undefined ) {
+				cards.push( leftSlot.card );
+			}
+		}
+		if ( index < card.slot.rack.slots.length -1 ) {
+			// Check Slot to right
+			let rightSlot = card.slot.rack.slots[ card.slot.index + 1];
+			if ( rightSlot.card != undefined ) {
+				cards.push( rightSlot.card );
+			}
+		}
+		return cards;
+	}
+
+	Game.getCardAcross = function ( card ) {
+		let index = card.slot.index;
+		let opponent = card.owner == Game.activePlayer ? Game.passivePlayer : Game.activePlayer;
+		return opponent.rack.slots[ index ].card;
+	}
+
+	Game.isTimeForEvent = function ( eventType, card ) {
+		console.log("Game.isTimeForEvent( "+eventType+", "+card.name);
+		// Check if it is time to execute a card's special of eventType
+		let ownerTurn = card.player === Game.activePlayer;
+		let startPortion = Game.turnPhasePortion === "start";
+		switch ( eventType ) {
+			case "summon":
+				// If card's owner is activePlayer, turnphase is start, and card was played this turn
+				if ( ownerTurn && startPortion && card.turnPlayed === Game.turnNum ) {
+					return true;
+				}
+			case "owner-turn-start":
+				// if card's owner is activePlayer, and turnPhasePortion is "start"
+				if ( ownerTurn && startPortion ) {
+					return true;
+				}
+			case "owner-turn-end":
+				if ( ownerTurn && !startPortion ) {
+					return true;
+				}
+			case "opponent-turn-start":
+				if ( !ownerTurn && startPortion ) {
+					return true;
+				}
+			case "opponent-turn-end":
+				if ( !ownerTurn && !startPortion ) {
+					return true;
+				}
+			default: 
+				return false;
+		}
+	}
+
 
 	//				^ End Game Object ^												//
 	//  																			//
@@ -2177,6 +2377,24 @@ Game.checkCreatureEvents = function( turnPhase ) {
 				"opponent-creature-across"
 				"creature-self"
 */
+
+	/*
+	=====================================================
+	//
+	//				UTILITY FUNCTIONS
+	//
+	=====================================================
+	*/
+	function arrayDeDuplicate(array) {
+		var a = array.concat();
+		for(var i=0; i<a.length; ++i) {
+			for(var j=i+1; j<a.length; ++j) {
+				if(a[i] === a[j])
+					a.splice(j--, 1);
+			}
+		}
+		return a;
+	}
 	
 
 

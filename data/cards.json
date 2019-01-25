@@ -3,24 +3,26 @@
 var cards_dataObj = { "elements" : [
 	 {"name" : "fire", "cards" : [
 		{ 
-		"name" : "Goblin Berserker",
-		"element" : "fire",
-		"type" : "creature",
-		"attack" : 4,
-		"life" : 16,
-		"cost" : 1,
-		"specials" : [
+			"name" : "Goblin Berserker",
+			"element" : "fire",
+			"type" : "creature",
+			"attack" : 4,
+			"life" : 16,
+			"cost" : 1,
+			"specials" : [
 			{
 				"event" : "owner-turn-start",
 				"target" : "neighbors",
 				"effect" : "hp",
-				"amount" : -2,
-			}]
+				"amount" : -2
+			}],
+			"description" : "At the beginning of its owners turn, Goblin Berserker deals 2 damage to its neighboring creatures."
 		},
 		{
 			"name" : "Wall of Fire",
 			"element" : "fire",
 			"type" : "creature",
+			"wall" : true,
 			"attack" : 0,
 			"life" : 5,
 			"cost" : 2,
@@ -29,62 +31,780 @@ var cards_dataObj = { "elements" : [
 				"target" : "opponent-creatures",
 				"effect" : "hp",
 				"amount" : -5
-			}]
+			}],
+			"description" : "When Wall of Fire is summoned it deals 5 damage to each of the opponent's creatures."
 		},
 		{
-			"name" : "Printer / Copier",
+			"name" : "Priest of Fire",
+			"element" : "fire",
+			"type" : "creature",
+			"attack" : 3,
+			"life" : 13,
+			"cost" : 3,
+			"specials" : [{
+				"event" : "owner-turn-start",
+				"target" : "owner",
+				"effect" : "powers",
+				"amount" : [1,0,0,0]				
+			}],
+			"description" : "Priest of Fire increases the growth of its owner's Fire power by 1."
+		},
+		{
+			"name" : "Fire Drake",
+			"element" : "fire",
+			"type" : "creature",
+			"attack" : 4,
+			"life" : 18,
+			"cost" : 4,
+			"specials" : [{
+				"event" : "summon",
+				"target" : "self",
+				"effect" : "property:turnPlayed",
+				"amount" : -1
+			}],
+			"description" : "Attacks the turn it is summoned"
+		},
+		{
+			"name" : "Orc Chieftain",
+			"element" : "fire",
+			"type" : "creature",
+			"attack" : 3,
+			"life" : 17,
+			"cost" : 5,
+			"specials" : [{
+				"event" : "persistant",
+				"target" : "neighbors",
+				"effect" : "boost-attack",
+				"amount" : 2,
+				"exception" : "wall"
+			}],
+			"description" : "Orc Chieftan increases the attack of its neighboring creatures by 2 (except walls)."
+		},
+		{
+			"name" : "Flame Wave",
+			"element" : "fire",
+			"type" : "spell",
+			"attack" : 0,
+			"life" : 0,
+			"cost" : 6,
+			"specials" : [{
+				"event" : "cast",
+				"target" : "opponent-creatures",
+				"effect" : "hp",
+				"amount" : 9
+			}],
+			"description" : "Flame Wave deals 9 damage to each of the opponent's creatures."
+		},
+		{
+			"name" : "Minotaur Commander",
+			"element" : "fire",
+			"type" : "creature",
+			"attack" : 6,
+			"life" : 20,
+			"cost" : 7,
+			"specials" : [{
+				"event" : "persistent",
+				"target" : "owner-creatures",
+				"effect" : "boost-attack",
+				"amount" : 1
+			}],
+			"description" : "Minotaur Commander increases by 1 the attack of all other owner's creatures (except walls)." 
+		},
+		{
+			"name" : "Bargul",
 			"element" : "fire",
 			"type" : "creature",
 			"attack" : 8,
-			"life" : 32,
-			"cost" : 9,
-			"specials" : [
-				{
-					"event" : "summon",
-					"target" : "owner",
-					"effect" : "powers",
-					"amount" : [1,1,1,1]
-				},
-				{
-					"event" : "die",
-					"target" : "opponent",
-					"effect" : "powers",
-					"amount" : [-1,-1,-1,-1]
-				}]
+			"life" : 26,
+			"cost" : 8,
+			"specials" : [{
+				"event" : "summon",
+				"target" : "all-creatures",
+				"effect" : "hp",
+				"amount" : -4
+			}],
+			"description" : "When Bargul is summoned it deals 4 damage to each other creature."
 		},
 		{
-			"name" : "Paper Clip",
-			"element" : "supplies",
+			"name" : "Inferno",
+			"element" : "fire",
+			"type" : "spell",
+			"attack" : 0,
+			"life" : 0,
+			"cost" : 9,
+			"specials" : [{
+				"event" : "cast",
+				"target" : "",
+				"effect" : "",
+				"amount" : 0
+			}],
+			"description" : "Inferno deals 18 damage to target opponent's creature and 10 damage to each of the opponent's other creatures."
+		},
+		{
+			"name" : "Fire Elemental",
+			"element" : "fire",
 			"type" : "creature",
-			"attack" : 3,
-			"life" : 12,
-			"cost" : 1,
-			"specials" : [
-			{
-				"event" : "owner-turn-start",
-				"target" : "neighbors",
+			"attack" : "owner-fire-power",
+			"life" : 37,
+			"cost" : 10,
+			"specials" : [{
+				"event" : "summon",
+				"target" : "opponent-creatures",
 				"effect" : "hp",
-				"amount" : -2
+				"amount" : -3
 			},
 			{
 				"event" : "summon",
-				"target" : "owner",
+				"target" : "opponent",
 				"effect" : "hp",
-				"amount" : 2
+				"amount" : -3
 			},
 			{
-				"event" : "die",
+				"event" : "owner-turn-start",
 				"target" : "owner",
-				"effect" : "element-powers",
+				"effect" : "powers",
+				"amount" : [1,0,0,0]
+			}],
+			"description" : "When Fire Elemental is summoned it deals 3 damage to the opponent and to each of the opponent's creatures. Fire Elemental increases the growth of its owner's Fire power by 1."
+		},
+		{
+			"name" : "Armageddon",
+			"element" : "fire",
+			"type" : "spell",
+			"attack" : 0,
+			"life" : 0,
+			"cost" : 11,
+			"specials" : [{
+				"event" : "cast",
+				"target" : "all-creatures",
+				"effect" : "hp",
+				"amount" : -(8 + owner fire power)
+			},
+			{
+				"event" : "cast",
+				"target" : "opponent",
+				"effect" : "hp",
+				"amount" : "formula:-(8 + owner fire power)"
+			}],
+			"description" : "Armageddon deals (8 + its caster's Fire power) damage to the opponent and to each creature."
+		},
+		{
+			"name" : "Dragon",
+			"element" : "fire",
+			"type" : "creature",
+			"attack" : 9,
+			"life" : 40,
+			"cost" : 12,
+			"specials" : [{
+				"event" : "persistent",
+				"target" : "owner-spells",
+				"effect" : "damage",
+				"amount" : "formula:*=1.5"
+			}],
+			"description" : "Dragon increases the damage its owner's spells deal by 50% (total damage will be rounded up)."
+		}
+	 ]},
+		
+	 { "name" : "water", "cards" : [
+		 {
+			"name" : "Meditation",
+			"element" : "water",
+			"type" : "spell",
+			"attack" : 0,
+			"life" : 0,
+			"cost" : 1,
+			"specials" : [{
+				"event" : "cast",
+				"target" : "owner",
+				"effect" : "powers",
+				"amount" : [1,0,1,1]
+			}],
+			"description" : "Meditation increases its caster's Fire, Air and Earth powers by 1."
+		},
+		{
+			"name" : "Sea Sprite",
+			"element" : "water",
+			"type" : "creature",
+			"attack" : 5,
+			"life" : 22,
+			"cost" : 2,
+			"specials" : [{
+				"event" : "owner-turn-start",
+				"target" : "owner",
+				"effect" : "hp",
+				"amount" : -2
+			}],
+			"description" : "At the beginning of its owner's turn, Sea Sprite deals 2 damage to its owner."
+		},
+		{
+			"name" : "Merfolk Apostate",
+			"element" : "water",
+			"type" : "creature",
+			"attack" : 3,
+			"life" : 10,
+			"cost" : 3,
+			"specials" : [{
+				"event" : "summon",
+				"target" : "owner",
+				"effect" : "powers",
+				"amount" : [2,0,0,0]
+			}],
+			"description" : "When Merfolk Apostate is summoned it increases its owner's Fire power by 2."
+		},
+		{
+			"name" : "Ice Golem",
+			"element" : "water",
+			"type" : "creatur",
+			"attack" : 4,
+			"life" : 12,
+			"cost" : 4,
+			"specials" : [{
+				"event" : "persistent",
+				"target" : "self",
+				"effect" : "immune-to-nonphysical",
+				"amount" : 0
+			}],
+			"description" : "Ice Golem receives no damage from spells and abilites."
+		},
+		{
+			"name" : "Merfolk Elder",
+			"element" : "water",
+			"type" : "creature",
+			"attack" : 3,
+			"life" : 16,
+			"cost" : 5,
+			"specials" : [{
+				"event" : "owner-turn-start",
+				"target" : "owner",
+				"effect" : "powers",
+				"amount" : [0,0,1,0]
+			}],
+			"description" : "Merfolk Elder increases the growth of its owner's Air power by 1."
+		},
+		{
+			"name" : "Ice Guard",
+			"element" : "water",
+			"type" : "creature",
+			"attack" : 3,
+			"life" : 20,
+			"cost" : 6,
+			"specials" : [{
+				"event" : "persistent",
+				"target" : "owner",
+				"effect" : "divide-damage-received",
+				"amount" : 0.5
+			}],
+			"description" : "Ice Guard reduces all damage dealt to its owner by 50% (total damage will be rounded up)."
+		},{
+			"name" : "Giant Turtle",
+			"element" : "water",
+			"type" : "creature",
+			"attack" : 5,
+			"life" : 16,
+			"cost" : 7,
+			"specials" : [{
+				"event" : "persistent",
+				"target" : "self",
+				"effect" : "subtract-damage-received",
+				"amount" : -5
+			}],
+			"description" : "Damage dealt to Giant Turtle is reduced by 5."
+		},{
+			"name" : "Acidic Rain",
+			"element" : "water",
+			"type" : "spell",
+			"attack" : 0,
+			"life" : 0,
+			"cost" : 8,
+			"specials" : [{
+				"event" : "cast",
+				"target" : "all-creatures",
+				"effect" : "hp",
+				"amount" : -15
+			},
+			{
+				"event" : "cast",
+				"target" : "opponent",
+				"effect" : "powers",
+				"amount" : [-1,-1,-1,-1]
+			}],
+			"description" : "Acidic Rain deals 15 damage to each creature, then decreases each of the opponent's powers by 1."
+		},{
+			"name" : "Merfolk Overlord",
+			"element" : "water",
+			"type" : "creature",
+			"attack" : 7,
+			"life" : 35,
+			"cost" : 9,
+			"specials" : [{
+				"event" : "neighbor-summon",
+				"target" : "new-neighbors",
+				"effect" : "turnPlayed",
+				"amount" : -1
+			}],
+			"description" : "Merfolk Overlord allows creatures in its neighboring slots to attack the turn they enter play."
+		},{
+			"name" : "Water Elemental",
+			"element" : "water",
+			"type" : "creature",
+			"attack" : "owners-water-power",
+			"life" : 37,
+			"cost" : 10,
+			"specials" : [{
+				"event" : "summon",
+				"target" : "owner",
+				"effect" : "hp",
+				"amount" : 10
+			},
+			{
+				"event" : "owner-turn-start",
+				"target" : "owner",
+				"effect" : "powers",
+				"amount" : [0,1,0,0]
+			}],
+			"description" : "When Water Elemental is summoned it heals 10 life to its owner. Water Elemental increases the growth of its owner's Water power by 1."
+		},{
+			"name" : "Mind Master",
+			"element" : "water",
+			"type" : "creature",
+			"attack" : 6,
+			"life" : 23,
+			"cost" : 11,
+			"specials" : [{
+				"event" : "owner-turn-start",
+				"target" : "owner",
+				"effect" : "powers",
 				"amount" : [1,1,1,1]
-			}]
+			}],
+			"description" : "Mind Master increases the growth of each of its owner's powers by 1."
+		},{
+			"name" : "Astral Guard",
+			"element" : "water",
+			"type" : "creature",
+			"attack" : 1,
+			"life" : 18,
+			"cost" : 12,
+			"specials" : [{
+				"event" : "opponent-turn-start",
+				"target" : "opponent",
+				"effect" : "powers",
+				"amount" : [-1-1-1-1]
+			}],
+			"description" : "Astral Guard decreases the growth of each of the opponent's powers by 1."
+		}
+	 ] },
+	 { "name" : "air", "cards" : [
+		 {
+			"name" : "Faerie Apprentice",
+			"element" : "air",
+			"type" : "creature",
+			"attack" : 4,
+			"life" : 12,
+			"cost" : 1,
+			"specials" : [{
+				"event" : "persistent",
+				"target" : "owner-spells",
+				"effect" : "damage",
+				"amount" : 1
+			}],
+			"description" : "Faerie Apprentice increases the damage its owner's spells deal by 1."
+		},{
+			"name" : "Griffin",
+			"element" : "air",
+			"type" : "creature",
+			"attack" : 3,
+			"life" : 15,
+			"cost" : 2,
+			"specials" : [{
+				"event" : "summon",
+				"target" : "opponent",
+				"effect" : "hp",
+				"amount" : -5,
+				"conditional" : "if owner Air power >= 5"
+			}],
+			"description" : "When Griffin is summoned, if its owner's Air power is 5 or more, it deals 5 damage to the opponent."
+		},{
+			"name" : "Call to Thunder",
+			"element" : "air",
+			"type" : "spell",
+			"attack" : 0,
+			"life" : 0,
+			"cost" : 3,
+			"specials" : [{
+				"event" : "cast",
+				"target" : "opponent-target-creature",
+				"effect" : "hp",
+				"amount" : -6
+			},
+			{
+				"event" : "cast",
+				"target" : "opponent",
+				"effect" : "hp",
+				"amount" : -6
+			}],
+			"description" : "Call to Thunder deals 6 damage to target opponent's creature and 6 damage to the opponent."
+		},{
+			"name" : "Faerie Sage",
+			"element" : "air",
+			"type" : "creature",
+			"attack" : 4,
+			"life" : 19,
+			"cost" : 4,
+			"specials" : [{
+				"event" : "summon",
+				"target" : "owner",
+				"effect" : "hp",
+				"amount" : "formula: Math.min(Earth power, 10)"
+			}],
+			"description" : "When Faerie Sage is summoned it heals an amount of life to its owner equal to its owner's Earth power, but not more than 10."
+		},{
+			"name" : "Wall of Lightning",
+			"element" : "air",
+			"type" : "creature",
+			"attack" : 0,
+			"life" : 28,
+			"cost" : 5,
+			"specials" : [{
+				"event" : "owner-turn-start",
+				"target" : "opponent",
+				"effect" : "hp",
+				"amount" : -4
+			}],
+			"description" : "At the beginning of its owner's turn, Wall of Lightning deals 4 damage to the opponent."
+		},{
+			"name" : "Lightning Bolt",
+			"element" : "air",
+			"type" : "spell",
+			"attack" : 0,
+			"life" : 0,
+			"cost" : 6,
+			"specials" : [{
+				"event" : "cast",
+				"target" : "opponent",
+				"effect" : "hp",
+				"amount" : "formula: - (5 + owner-Air-power)"
+			}],
+			"description" : "Lightning Bolt deals (5+its caster's Air power) damage to the opponent."
+		},{	
+			"name" : "Phoenix",
+			"element" : "air",
+			"type" : "creature",
+			"attack" : 7,
+			"life" : 16,
+			"cost" : 7,
+			"specials" : [{
+				"event" : "die",
+				"target" : "self",
+				"effect" : "hp",
+				"amount" : 16,
+				"conditional" : "owner-Fire-power >= 10"
+			}],
+			"description" : "Each time Phoenix dies, if its owner's Fire power is 10 or greater, it rebirths (another Phoenix is put into the same slot). Phoenix cannot rebirth if a card says that it is “destroyed.”"
+		},{
+			"name" : "Chain Lightning",
+			"element" : "air",
+			"type" : "spell",
+			"attack" : 0,
+			"life" : 0,
+			"cost" : 8,
+			"specials" : [{
+				"event" : "cast",
+				"target" : "opponent-creatures",
+				"effect" : "hp",
+				"amount" : -9
+			},
+			{
+				"event" : "cast",
+				"target" : "opponent",
+				"effect" : "hp",
+				"amount" : -9
+			}],
+			"description" : "Chain Lightning deals 9 damage to the opponent and to each of the opponent's creatures."
+		},{
+			"name" : "Lightning Cloud",
+			"element" : "air",
+			"type" : "creature",
+			"attack" : 4,
+			"life" : 20,
+			"cost" : 9,
+			"specials" : [{
+				"event" : "attack",
+				"target" : "opponent-creatures",
+				"effect" : "hp",
+				"amount" : -4
+			},
+			{
+				"event" : "attack",
+				"target" : "opponent",
+				"effect" : "hp",
+				"amount" : -4
+			}],
+			"description" : "Lightning Cloud's attack damages the opponent and each of the opponent's creatures."
+		},{
+			"name" : "Tornado",
+			"element" : "air",
+			"type" : "spell",
+			"attack" : 0,
+			"life" : 0,
+			"cost" : 10,
+			"specials" : [{
+				"event" : "cast",
+				"target" : "opponent-target-creature",
+				"effect" : "hp",
+				"amount" : "-all"
+			}],
+			"description" : "Destroy target opponent's creature."
+		},{
+			"name" : "Air Elemental",
+			"element" : "air",
+			"type" : "creature",
+			"attack" : "owner-air-power",
+			"life" : 44,
+			"cost" : 11,
+			"specials" : [{
+				"event" : "summn",
+				"target" : "opponent",
+				"effect" : "hp",
+				"amount" : -8
+			},
+			{
+				"event" : "owner-turn-start",
+				"target" : "owner",
+				"effect" : "power",
+				"amount" : [0,0,1,0]
+			}],
+			"description" : "When Air Elemental is summoned it deals 8 damage to the opponent. Air Elemental increases the growth of its owner's Air power by 1."
+		},{
+			"name" : "Titan",
+			"element" : "air",
+			"type" : "creature",
+			"attack" : 9,
+			"life" : 40,
+			"cost" : 12,
+			"specials" : [{
+				"event" : "summon",
+				"target" : "across",
+				"effect" : "hp",
+				"amount" : -15
+			}],
+			"description" : "When Titan is summoned it deals 15 damage to the creature in the opposing slot."
 		}
 	]},
-	 { "name" : "water", "cards" : [] }
-]}
-		
-
-		
+	{ "name" : "earth", "cards" : [
+		{
+			"name" : "Elven Healer",
+			"element" : "earth",
+			"type" : "creature",
+			"attack" : 2,
+			"life" : 12,
+			"cost" : 1,
+			"specials" : [{
+				"event" : "owner-turn-start",
+				"target" : "owner",
+				"effect" : "hp",
+				"amount" : +3
+			}],
+			"description" : "At the beginning of its owner's turn, Elvish Healer heals 3 life to its owner."
+		},{
+			"name" : "Nature’s Ritual",
+			"element" : "earth",
+			"type" : "spell",
+			"attack" : 0,
+			"life" : 0,
+			"cost" : 2,
+			"specials" : [{
+				"event" : "cast",
+				"target" : "owner-target-creature",
+				"effect" : "hp",
+				"amount" : +8
+			},
+			{
+				"event" : "cast",
+				"target" : "owner",
+				"effect" : "hp",
+				"amount" : +8
+			}],
+			"description" : "Nature's Ritual heals 8 life to target caster's creature and to its caster."
+		},{
+			"name" : "Forest Sprite",
+			"element" : "earth",
+			"type" : "creature",
+			"attack" : 1,
+			"life" : 22,
+			"cost" : 3,
+			"specials" : [{
+				"event" : "attack",
+				"target" : "opponent-all-creaures",
+				"effect" : "hp",
+				"amount" : -1
+			},
+			{
+				"event" : "attack",
+				"target" : "opponent",
+				"effect" : "hp",
+				"amount" : -1
+			}],
+			"description" : "Forest Sprite's attack damages the opponent and each of the opponent's creatures."
+		},{
+			"name" : "Rejuvenation",
+			"element" : "earth",
+			"type" : "spell",
+			"attack" : 0,
+			"life" : 0,
+			"cost" : 4,
+			"specials" : [{
+				"event" : "cast",
+				"target" : "owner",
+				"effect" : "hp",
+				"amount" : "formula: owner-earth-power * 2"
+			}],
+			"description" : "Rejuvenation heals an amount of life to its caster equal to twice its caster's Earth power."
+		},{
+			"name" : "Elf Hermit",
+			"element" : "earth",
+			"type" : "creature",
+			"attack" : 1,
+			"life" : 13,
+			"cost" : 5,
+			"specials" : [{
+				"event" : "owner-turn-start",
+				"target" : "owner",
+				"effect" : "powers",
+				"amount" : [0,0,0,2]
+			}],
+			"description" : "Elf Hermit increases the growth of its owner's Earth power by 2."
+		},{
+			"name" : "Nature’s Fury",
+			"element" : "earth",
+			"type" : "spell",
+			"attack" : 0,
+			"life" : 0,
+			"cost" : 6,
+			"specials" : [{
+				"event" : "cast",
+				"target" : "opponent",
+				"effect" : "hp",
+				"amount" : "formula: - (owner's 2 highest attack creatures)"
+			}],
+			"description" : "Nature's Fury deals an amount of damage to the opponent equal to the total attack of its caster's two creatures with the highest attack."
+		},{
+			"name" : "Giant Spider",
+			"element" : "earth",
+			"type" : "creature",
+			"attack" : 4,
+			"life" : 24,
+			"cost" : 7,
+			"specials" : [{
+				"event" : "summon",
+				"target" : "neighbor-slots",
+				"effect" : "summon-Forest Spider",
+				"amount" : 
+			}],
+			"description" : "When Giant Spider is summoned, it puts a 2/11 Forest Spider into each of its empty neighboring slots."
+		},{
+			"name" : "Forest Spider",
+			"element" : "earth",
+			"type" : "creature",
+			"attack" : 2,
+			"life" : 11,
+			"cost" : "can't summon",
+			"specials" : [{
+				"event" : "",
+				"target" : "",
+				"effect" : "",
+				"amount" : 
+			}],
+			"description" : ""
+		},{
+			"name" : "Troll",
+			"element" : "earth",
+			"type" : "creature",
+			"attack" : 6,
+			"life" : 26,
+			"cost" : 8,
+			"specials" : [{
+				"event" : "owner-turn-start",
+				"target" : "self",
+				"effect" : "hp",
+				"amount" : 4
+			}],
+			"description" : "At the beginning of its owner's turn, Troll heals 4 life to itself."
+		},{
+			"name" : "Stone Rain",
+			"element" : "earth",
+			"type" : "spell",
+			"attack" : 0,
+			"life" : 0,
+			"cost" : 9,
+			"specials" : [{
+				"event" : "cast",
+				"target" : "all-creatures",
+				"effect" : "hp",
+				"amount" : -25
+			}],
+			"description" : "Stone Rain deals 25 damage to each creature."
+		},{
+			"name" : "Earth Elemental",
+			"element" : "earth",
+			"type" : "creature",
+			"attack" : "owner-earth-power",
+			"life" : 50,
+			"cost" : 10,
+			"specials" : [{
+				"event" : "owner-turn-start",
+				"target" : "owner",
+				"effect" : "powers",
+				"amount" : [0,0,0,1]
+			}],
+			"description" : "Earth Elemental increases the growth of its owner's Earth power by 1."
+		},{
+			"name" : "Master Healer",
+			"element" : "earth",
+			"type" : "creature",
+			"attack" : 3,
+			"life" : 34,
+			"cost" : 11,
+			"specials" : [{
+				"event" : "owner-turn-start",
+				"target" : "owner-creatures",
+				"effect" : "hp",
+				"amount" : 3
+			},{
+				"event" : "owner-turn-start",
+				"target" : "owner",
+				"effect" : "hp",
+				"amount" : 3
+			}],
+			"description" : "At the beginning of its owner's turn, Master Healer heals 3 life to its owner and to each of its owner's creatures."
+		},{
+			"name" : "Hydra",
+			"element" : "earth",
+			"type" : "creature",
+			"attack" : 3,
+			"life" : 40,
+			"cost" : 12,
+			"specials" : [{
+				"event" : "attack",
+				"target" : "opponent-creatures",
+				"effect" : "hp",
+				"amount" : -3
+			},
+			{
+				"event" : "attack",
+				"target" : "opponent",
+				"effect" : "hp",
+				"amount" : -3
+			},
+			{
+				"event" : "owner-turn-start",
+				"target" : "self",
+				"effect" : "hp",
+				"amount" : 4
+			}],
+			"description" : "Hydra's attack damages the opponent and each of the opponent's creatures. At the beginning of its owner's turn, Hydra heals 4 life to itself."
+		}
+	 ]}
+]}	
 
 /*
 FIRE CARDS
