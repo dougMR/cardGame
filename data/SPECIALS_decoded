@@ -1,0 +1,176 @@
+SPECIALS
+
+event -
+(what triggers the special's activation
+)
+	summon (this card summoned)
+	summon-neighbor - (neighbor (either) is summoned)
+	summon-sibling - (my sibling is summoned)
+
+	owner-turn-start
+	owner-turn-end (?)
+	opponent-turn-start
+	opponent-turn-end(?)
+
+	attack (this card attacks) (?)
+	neighbor-attack (?)
+	sibling-attack (?)
+	across-attack (?)
+	opponent-creature-attack(?)
+
+	defend-self (this card defends)
+	owner-defend (owner is attacked)
+	neighbor-defend (neighbor is attacked)
+	sibling-defend (?)
+
+	die
+	neighbor-die (?)
+	sibling-die (?)
+	across-die (?)
+	opponen-creature-die (?)
+
+	cast (this spell-card is cast)
+	owner-cast (my owner is casting a spell-card)
+
+
+target - 
+(whom special is acting upon)
+
+	owner
+	self
+	neighbors
+	siblings
+
+	opponent
+	across
+	opponent-creatures
+
+	all-creatures
+
+
+effect -
+(what property gets affected)
+
+	If Effect string is "powers", expect amount to be an array of values for each power.
+
+	If Effect is string, look for target["effect"] property, where effect is property keyword.
+		eg. cardX['attack'] or playerX['hp']
+
+	If that property doesn't exist on that target, check effect string against code words, such as...
+	"damage" - in the context of modifying spells, the special modifies the damage of the currently cast spell.
+	** - Yet to finalize how "damage" gets applied
+	-- "damage" modifies damage from "owner-cast" event.  
+
+	On "defend-" event, these effects modify damage before it is applied.
+	"nonphysical-percent" - reduces nonphysical damage by percent defined in amount
+	"physical-percent" - " physical " " "
+	"nonphysical-amount" - reduces nonphysical damage by amount
+	"physical-amount" - " physical " " "
+
+
+amount - 
+(what amount gets applied to affected property)
+
+	Number, array or string.
+
+
+
+
+
+//==============================================
+When a creature attacks, or a spell (attack spell) is cast,
+1) find target/s
+2) determine damage
+3) modify damage by "attack" events
+4) modigy damage by "defend" events
+5) apply damage
+
+
+BUG REPORT:
+_______________________
+
+√ -  minotaur-boosted attacks do not drop back to normal immidiately when minotaur dies.
+
+√ - When Giant Spider is cast (while minotaur on the board), GS gets attack bonus, but it's Forest Spiders do not.
+√	Now one Forest Spider gets 2 attack boosts, but other gets none.
+
+√ - Hydra does no damage.
+
+√ - Ice Guard is causing fractional damage (should be rounded).  
+√ - Ice Guard is affecting teammate cards' incoming damage, not just damage to Player
+
+√ - Lightning Bolt is adding damage rather than subtracting
+
+√ - Rejuvenation is subtracting hp rather than adding
+
+
+√ - Nature's Fury: No solution yet. - wrote a custom function
+
+√ - Fire Elemental's attack is not increasing with Fire power.  Instead, it appears to be getting added as a string.
+√ - Water Elemental same.
+
+√ - Phoenix's attack jumped to 16. 
+√ - When a creature is played, it takes on Fire Elemental's HP at that turn 
+    : enqueueSummonPhaseSpecials had been making the summoned card teh target of summon-sibling, regardless of Fire Elemental specifying "self"
+
+
+
+√ - Inferno wouldnt let me choose Target of my choice.  Accepted my 4th choice.  And only did 10 damage each
+√ - Targeted spells don't let me select all legal targets sometimes
+	:jquery's .off() was the culprit
+
+√ - Call to Thunder can't choose some creatures for Target (human player's move)
+√ - Call to Thunder auto-chose Target creature for human player
+√ - Then AI creatures attacked themselves
+	:had if activePlayer = computerPlayer, rather than ==
+
+√ - * AI Call to Thunder highlights my cards, rather than picking one itself...
+√ - But then another time, AI chose target itself
+
+√ - When Forest Sprite has attack boosted (by Orc Chieftain, eg), it still only does 1 point damage to enemies
+
+
+√ - If player is killed by a spell, game doesn't end until an attack is made.
+
+√ - When AI has Ice Guard in play, my Forest Sprite (boosted to 3 attack by Orc Chieftain), still does 3 damage to AIPlayer.
+
+- in Game.executeSpecial(), when checkSpecialDefend gets applied, how do we know if attack is physical or nonPhysical?
+
+√ - Phoenix gets 16 hp when it dies (and player's powers@0 >= 10), but doesn't come back to life.
+
+
+√ - Tornado does not destroy target creature, and doesn't continue to next player turn.
+	:fixed with magic AmountString.  Added "target" to ref switch in decoder function Game.specialGetStringamountAmount
+
+√ - Placing Forest Sprite after Minotaur Commander, Forest Sprite attack did not increase.
+√ - First card on rack gets the boost instead.
+	:ugly hack in Game.enqueueSummonPhaseSpecials
+
+
+√ - Lightning cloud doesn't damage Ice Golem.  It should (Physical attack)
+	:specials now have special.isNonPhysical
+
+√ - Ice Guard doesn't halve Wall of Lightning damage
+	:added checkDefend call in execute special
+
+- Cards in deck and in rack have shadows overlapping.
+
+√ - Master Healer is not healing itself.
+
+
+
+FEATURE REQUESTS:
+_______________________
+
+
+- If no card can be played, AI needs to skip turn.  Also need option for Human to skp turn.
+
+- WHen cards "flex" to show they're executing special, make them take turns
+
+- AI needs to pick card for spells requiring target-creature
+
+
+
+
+
+

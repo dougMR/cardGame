@@ -2,6 +2,7 @@
 <html>
 <head>
 
+	<meta charset="UTF-8">
 <!-- import TweenMax and jquery -->
 
 <!-- 
@@ -20,22 +21,32 @@ html, body {
 }
 body {
 	background-image: url('images/bg-texture-stone.jpg');
+	
+	/*background-image: url('images/white-marble-wallpaper-19.jpg');*/
 }
 #game-container {
 	/*border: 1px dashed orange;*/
 	position: relative;
-	width: 800px;
+	width: 100%;
+	height: 100%;
+	/*perspective-origin: 75% 25%;*/
+	transform-origin: 200px 100px;
 	transform-style: preserve-3d;
-	perspective: 2000px;
-	transform: scale( 1 );
+	perspective: 1000px;
+	/*transform: scale( 0.85 );*/
+	top: 50px;
 }
 #player-card-deck {
 	position: absolute;
-	left: 440px;
-	top: 360px;
+	left: 420px;
+	top: 460px;
 	background: rgba(255, 255, 255, 0.5);
 	border: 2px solid black;
 	box-sizing: border-box;
+	perspective: 1000px;
+	transform-origin: top left;
+	z-index: 100;
+	/*transform: scale( 0.85 );*/
 }
 .game-element {
 	position: absolute;
@@ -82,9 +93,11 @@ body {
 	font-size: 10px;
 	color: #333;
 	/*box-shadow: 5px 5px 6px rgba(0,0,0,0.5);*/
+	/*transform: perspective( 200px );*/
 	transform-style: preserve-3d;
+
 }
-.card, .card-front, .card-back, .card-shadow, .card-hilite, .card-dim, .card-slot {
+.card, .card-front, .card-back, .card-shadow, .card-hilite, .card-dim, .card-slot,.card-slot:before {
 	position: absolute;
 /*	width: 100px;
 	height: 147px;*/
@@ -115,7 +128,8 @@ body {
 }
 .card-front {
 	background-color: #fdf2e2;
-	background-image: url('images/bg-texture-light-300x300.jpg');
+	/*background-image: url('images/bg-texture-light-300x300.jpg');*/
+	background-image: url('images/white-marble-wallpaper-19.jpg');
 	background-size: cover;
 	transform: rotateY( 180deg );
 }
@@ -145,8 +159,9 @@ body {
 .card .title {
 	font-weight: 900;
 	font-family: serif;
-	font-size: 1.5em;
+	font-size: 1.2em;
 	color: #6d5246;
+	text-shadow: 1px 1px 0.1em white;
 }
 .card .title:after {
 	white-space: pre;
@@ -203,13 +218,27 @@ body {
 .card-slot {
 	position: absolute;
 	background-color: rgba( 128, 128, 255, 0.5 );
-	border: 1px solid white;
+	border: 1px solid #DDD;
 	box-shadow: inset 0 0 1em rgba(0,0,0,0.5);
+	box-sizing: border-box;
+}
+.card-slot::before {
+	content: "";
+	position: absolute;
+	border: 2px solid #DDD;
+	border-top-color: #888;
+	border-left-color: #aaa;
+	border-right-color: #CCC;
+	box-sizing: content-box;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
 }
 .card-rack {
-	border: 1px solid black;
-	background-color: rgba( 255, 255, 255, 0.65 );
-	box-shadow: inset 0 0 20px brown;
+	/*border: 1px solid black;*/
+	background-color: rgba( 64, 64, 64, 0.65 );
+	/*box-shadow: inset 0 0 40px cornflowerblue;*/
 }
 
 #bg {
@@ -231,7 +260,7 @@ body {
 }
 #ai-cards {
 	position: absolute;
-	top: 450px;
+	top: 590px;
 	left: 10px;
 	padding: 15px;
 	box-sizing: border-box;
@@ -248,6 +277,43 @@ body {
 
  -----------------------------
 */
+.floating-field {
+	color: black;
+	text-shadow: 0 0 0.1em white;
+	font-family: sans-serif;
+	font-size: 1.1em;
+	/*font-weight: bold;*/
+	border-radius: 50%;
+	/*background-color: rgba(255,255,0,0.5);*/
+	/*border: 1px solid yellow;*/
+	/*padding: 1em;*/
+	width: 2em;
+	height: 2em;
+	padding-top: 0.4em;
+	margin-left: -1em;
+	margin-top: -1em;
+	text-align: center;
+}
+/*.floating-field:after {
+	content: "";
+	border-top: 1px solid yellow;
+	border-left: 1px solid yellow;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	height: 100%;
+	width: 100%;
+}*/
+.floating-field.red {
+	color: #FFF000;
+	text-shadow: 0 0 0.1em black, 0 0 1px black, 0px 2px 0.1em black, 0px -2px 1px black, -2px 0px 1px black, 2px 0px 1px black;
+	background-color: rgba(255,0,0,0.65);
+}
+.floating-field.green {
+	color: white;
+	text-shadow: 0 0 0.1em darkgreen, 0 0 1px darkgreen, 0px 2px 0.1em darkgreen, 0px -2px 1px darkgreen, -2px 0px 1px darkgreen, 2px 0px 1px darkgreen;
+	background-color: rgba(0,255,0,0.65);
+}
 .points-field { 
 	position: absolute;
 	font-family: sans-serif;
@@ -274,10 +340,10 @@ body {
 	     1px 1px 0 #000;
 }
 
-.turn-counter {
+.turn-counter, #skip-turn-button {
 	position: absolute;
 	left: 10px;
-	top: 150px;
+	top: 250px;
 	border: 1px solid brown;
 	box-shadow: 0 0 10px black;
 	box-sizing: border-box;
@@ -288,6 +354,57 @@ body {
 	text-align: center;
 }
 
+#skip-turn-button {
+	border-radius: 50%;
+	width: 50px;
+	height: 50px;
+	left: 100px;
+}
+
+#card-description {
+	position: absolute;
+	/* */
+	box-shadow: inset 0.3em 0.2em 0.15em #222, inset -0.5em -0.5em 0.5em #222, inset -0.5em -0.5em 0.5em rgba(200,200,255,0.95), inset 0.4em 0.4em 0.35em rgba(200,200,255,0.95), inset 0.5em 0.5em .5em 0.5em #222;
+	padding: 1em;
+	border-radius: 0.5em;
+	box-sizing: border-box;
+	border-color: white;
+	color: gold;
+	text-shadow: 0.15em 0.3em 0.3em #221111;
+	top: 495px;
+	left: 10px;
+	width: 400px;
+	height: 90px;
+}
+#game-logo {
+	position: absolute;
+	height: 120px;
+	width: auto;
+	left: 50px; /*50%;*/
+	/*transform: translateX(-50%);*/
+	top: 6px;
+}
+#splash-screen {
+	position: absolute;
+	width: 100%;
+	height: 100%;
+	margin: 0;
+	box-sizing: border-box;
+	background-color: white;
+	z-index: 1000;
+}
+#splash-screen #content {
+	/*position: absolute;*/
+	display: inline-block;
+	position: absolute;
+	text-align: center;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%, -50%);
+	border: 2px solid orange;
+	padding: 2em;
+}
+
 </style>
 
 </head>
@@ -296,42 +413,41 @@ body {
 <!-- <img id="layout" src="images/gameplay_spectromancer.jpg" /> -->
 <!-- <div id="layout"></div> -->
 <!-- <div id="bg"></div> -->
+<img id="game-logo" src="images/game-logo.png" />
 <div id="ai-cards"></div>
-<!-- 
+<div id="card-description"></div>
+
+<div id = "splash-screen">
+	<div id = "content" >OFFICE BATTLE
+		<br />
+		<button id="start-button">start</button>
+	</div>
+</div>
+
+<audio id="attack-sound" src="sounds/scrape.wav" autoplay="false" ></audio>
+<!-- <audio id="spell-sound" src="sounds/spell.wav" autoplay="false" ></audio> -->
+<audio id="spell-sound">
+	<source src="sounds/spell.wav" type="audio/wav" >
+</audio>
+<audio id="special-sound" src="sounds/special.wav" autoplay="false" ></audio>
+<audio id="flip-sound" src="sounds/card-flip.wav" autoplay="false" ></audio>
 
 
+<!-- Currently, card deck is only generated once, as part of the process of creating a player (either Human or AI).  Need to allow for changing cards in a deck.
 
-Currently, card deck is only generated once, as part of the process of creating a player (either Human or AI).  Need to allow for changing cards in a deck.
-
-Deck.changeCards() ? 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+Deck.changeCards() ? -->
 
 
 
 
 
-
- -->
 <script>
-let Game = (function(namespace){
+let GameScope = (function(namespace){
 	// Isolated namespace for all this code...
+
+	// let Game;
+
+
 
 	let isTouch = ("touchstart" in document.documentElement);
 	let cardWidth = 94,
@@ -347,13 +463,58 @@ let Game = (function(namespace){
 
 	let AICardGrid = document.getElementById("ai-cards");
 	$(AICardGrid).css({width: cardWidth*4 +30, height: cardHeight*4 +30});
+	$(AICardGrid).detach();
+	gameContainer.appendChild(AICardGrid);
 
 	let turnCountField = document.createElement("span");
 	$(turnCountField).addClass("turn-counter");
 	gameContainer.appendChild(turnCountField);
 
+	let skipTurnButton = document.createElement("button");
+	$(skipTurnButton).attr("id",  "skip-turn-button");
+	$(skipTurnButton).html("skip<br />turn");
+	gameContainer.appendChild(skipTurnButton);
+	$(skipTurnButton).css("display","none");
+	
+
 	let computerPlayer, livePlayer;
 
+	let cardDescriptionField = document.getElementById("card-description");
+	$(cardDescriptionField).detach();
+	gameContainer.appendChild(cardDescriptionField);
+
+	let Sounds = {};
+	Sounds.initSounds = function () {
+		Sounds.attack = document.getElementById("attack-sound");
+		Sounds.spell = document.getElementById("spell-sound");
+		Sounds.special = document.getElementById("special-sound");
+		Sounds.flip = document.getElementById("flip-sound");
+	}
+
+	let startButton = document.getElementById("start-button");
+	startButton.addEventListener("click", function(e) {
+		Sounds.special.play();
+		// document.getElementById("spell-sound").play();
+		document.getElementById("splash-screen").style.display = "none";
+		Game.startGame();
+	});
+
+
+
+
+
+
+/*
+
+ ######  ##          ###     ######   ######  ########  ######  
+##    ## ##         ## ##   ##    ## ##    ## ##       ##    ## 
+##       ##        ##   ##  ##       ##       ##       ##       
+##       ##       ##     ##  ######   ######  ######    ######  
+##       ##       #########       ##       ## ##             ## 
+##    ## ##       ##     ## ##    ## ##    ## ##       ##    ## 
+ ######  ######## ##     ##  ######   ######  ########  ######  
+
+*/
 
 	/////////////////////////////////////////////////////
 	//
@@ -368,7 +529,8 @@ let Game = (function(namespace){
 	class GameElement {
 		constructor ( el ) {
 			// console.log('GameElement constructor()');
-			this._x = 0, this._y = 0;
+			this._x = 0;
+			this._y = 0;
 			this._myEl = el;
 			this._height = $(el).outerHeight();
 			this._width = $(el).outerWidth();
@@ -437,8 +599,31 @@ let Game = (function(namespace){
 
 
 
+/*
+
+ .o88b.  .d8b.  d8888b. d8888b. 
+d8P  Y8 d8' `8b 88  `8D 88  `8D 
+8P      88ooo88 88oobY' 88   88 
+8b      88~~~88 88`8b   88   88 
+Y8b  d8 88   88 88 `88. 88  .8D 
+ `Y88P' YP   YP 88   YD Y8888D' 
+                                
+*/                                
+
+/*
+	Card.special.misc is a catch-all object 
+	for holding properties used for future 
+	inspections of card actions/abilities.
+	These include:
+
+	{ wall : bool } 
+	 - is this card of type wall?
+	{ "spellDamageModifier" : "*:1.5"} 
+	 - amount by which to multiply or add a spell's damage.  Note indicator with colon.
+	{ spawn : { type : creatureName } { number : 2 } { location : "neighbors" } { event : "summon" } }
 
 
+*/
 
 
 
@@ -492,14 +677,14 @@ let Game = (function(namespace){
 			// Opponent's card?
 		*/
 
-		constructor ( ele, atk, def, hp, cost, img, tit, type, specials ) {
+		constructor ( ele, atk, def, hp, cost, img, tit, type, specials, description, misc ) {
 			// console.log('Card constructor('+ele+', '+atk+', '+def+', '+cost+', '+img+', '+tit+', '+hp+')');
 			let _el = document.createElement("div");
 			super( _el );
-			this.init(atk, def, cost, img, tit, ele, hp, type);
+			this.init(atk, def, cost, img, tit, ele, hp, type, specials, description, misc );
 		}
 
-		init ( atk, def, cost, img, tit, ele, hp, type ) {
+		init ( atk, def, cost, img, tit, ele, hp, type, specials, description, misc ) {
 			this._type = type; // "creature" or "spell"
 			this._faceShowing = -1;
 			this._attack = atk != undefined ? atk : 0;
@@ -507,8 +692,14 @@ let Game = (function(namespace){
 			this._cost = cost != undefined ? cost : 0;
 			this._level = this._attack + this._defense + this._cost;
 			this._imgSrc = img != undefined ? img : "";
-			this._title = tit != undefined ? " "+tit : "...";	
-			this._specials = {},
+			this._title = tit != undefined ? ""+tit : "...";	
+			this._specials = specials;
+			for ( let special of this._specials ) {
+				// give specials reference to their card
+				special.card = this;
+			}
+			this._description = description;
+			this._misc = misc;
 			this._shadowEl = document.createElement("div");
 			this._hp = this._maxhp = hp;
 			this._locked = false;
@@ -529,6 +720,10 @@ let Game = (function(namespace){
 			$(this.el).on( evt, () => {
 				this.select() 
 			} );
+			$(this.el).hover( () => {
+				this.rollover();
+			}
+			);
 		}
 
 		assemble () {
@@ -619,31 +814,35 @@ let Game = (function(namespace){
 		 	}
 		 }
 
-		kill () {
-			console.log("Card.kill()");
-			console.log("my slot: "+this.slot);
+		kill ( simplyRemove ) {
+			console.log("Card.kill() ("+this.name+")");
+			// simplyRemove = simplyRemove === true;
+			// if ( !simplyRemove ) Game.executeDyingCardSpecial ( this );
 			$(this._shadowEl).remove();
 			if ( this.slot != undefined ) {
 				this.slot.card = null;
 			}
 			
 			super.kill();
+					
 		}
 
 		setSelectBehavior ( func ) {
-			// console.log("Card.setSelectBehavior( "+func+" )");
+			console.log("Card.setSelectBehavior( "+this.name+" )");
 			this._onSelectFunction = func;
 		}
 		removeSelectBehavior ( func ){
+			console.log("Card.removeSelectBehavior( "+this.name+")");
 			this._onSelectFunction = null;
 			
+			/*
 			let evt = isTouch ? 'touchend' : 'click';
 			if ( func ) {
 				$(this.el).off( evt, func );
 			} else {
 				$(this.el).off( evt );
 			}
-			
+			*/
 		}
 		lock () {
 			this._locked = true;
@@ -661,8 +860,7 @@ let Game = (function(namespace){
 			this._dimEl.style.visibility = "hidden";
 		}
 		select () {
-			console.log("Card.select()");
-			console.log("_locked: "+this._locked);
+			console.log("Card.select("+this.name+")");
 			if ( !this._locked ) {
 				try { this._onSelectFunction() }
 				catch (error) { console.log( "ERROR:  "+error ) };
@@ -677,6 +875,10 @@ let Game = (function(namespace){
 				Game.selectedCard = null;
 			}
 			this.unhilite();
+		}
+
+		rollover () {
+			Game.displayCardDescription( this );
 		}
 
 		hilite( ) {
@@ -715,6 +917,17 @@ let Game = (function(namespace){
 					// TweenMax.to(c.shadow, .75*dur, {css:{x:x2, y:y2}, ease:Power2.easeOut});
 				}			
 				this._faceShowing *= -1;
+			}
+		}
+
+		flex ( ) {
+			console.log(" START FLEX - "+this.name+", "+this.slot.index);
+			let dur = 0.35;
+			TweenMax.to( this.el, dur, {z:10, yoyo:true, repeat:1, ease:Sine.easeOut, onComplete: complete});
+			let that = this;
+			function complete () {
+				TweenMax.set(this.target, {z:2});
+				console.log(" END FLEX - "+that.name+", "+that.slot.index);
 			}
 		}
 
@@ -786,10 +999,20 @@ let Game = (function(namespace){
 
 	 	set hp ( value ) {
 	 		if ( value != undefined ) {
+	 			let oldHP = this._hp;
 	 			this._hp = Math.min( value, this._maxhp );
+	 			let diff = this._hp - oldHP;
+	 			if ( diff != 0 ) {
+	 				new FloatingField ( diff, {targetEl:this._hpEl} );
+	 			}
 	 			this.update();
 				if ( this.hp <= 0 ) {
-		 			this.kill();
+					this._hp = 0;
+					Game.executeDyingCardSpecial ( this );
+					// Did dying card special bring me back to life?
+					if ( this.hp <= 0 ) {
+			 			this.kill();
+			 		}
 		 		}
 	 		}
 	 	}
@@ -802,6 +1025,9 @@ let Game = (function(namespace){
 	 	}
 		
 		get title () {
+	 		return this._title;
+	 	}
+	 	get name () {
 	 		return this._title;
 	 	}
 		 
@@ -841,6 +1067,23 @@ let Game = (function(namespace){
 		get turnPlayed () {
 			return this._turnPlayed;
 		}
+		set turnPlayed ( value ) {
+			if ( typeof value === "number" ) {
+				this._turnPlayed = value;
+			}
+		}
+
+		get specials () {
+			return this._specials;
+		}
+
+		get description () {
+			return this._description;
+		}
+
+		get misc () {
+			return this._misc;
+		}
 	}
 
 	// -- End Card Constructor
@@ -850,7 +1093,17 @@ let Game = (function(namespace){
 
 
 
+/*
 
+########  ##          ###    ##    ## ######## ########      ######  ##          ###     ######   ######  
+##     ## ##         ## ##    ##  ##  ##       ##     ##    ##    ## ##         ## ##   ##    ## ##    ## 
+##     ## ##        ##   ##    ####   ##       ##     ##    ##       ##        ##   ##  ##       ##       
+########  ##       ##     ##    ##    ######   ########     ##       ##       ##     ##  ######   ######  
+##        ##       #########    ##    ##       ##   ##      ##       ##       #########       ##       ## 
+##        ##       ##     ##    ##    ##       ##    ##     ##    ## ##       ##     ## ##    ## ##    ## 
+##        ######## ##     ##    ##    ######## ##     ##     ######  ######## ##     ##  ######   ######  
+
+*/
 	
 
 
@@ -882,9 +1135,9 @@ let Game = (function(namespace){
 			this._portraitImg.className = "portrait";
 			this._portraitImg.src = "images/"+this.portraitSrc;
 			this._elementValues = [1,1,1,1];
-			this._elementNames = [ "supplies", "downtime", "productivity", "incentives" ];
+			this._elementNames = [ "uptime", "downtime", "collaboration", "incentives" ];
 			this._hp = 100;
-			this.rack = new Rack( this );
+			this._rack = new Rack( this );
 			this.deck = new Deck( this );
 			// console.log("this.deck: "+this.deck);
 			// console.log(this.deck);
@@ -928,8 +1181,15 @@ let Game = (function(namespace){
 			this._y = yvalue;
 		}
 		// 
-		setElement ( index, value ) {
+		setElement ( index, value, animate ) {
+			console.log("Player.setElement()",animate);
 			if ( index != undefined && value != undefined ) {
+				animate = animate === true;
+				let oldValue = this.getElement( index );
+				let diff = value - oldValue;
+				if ( animate && diff != 0 ) {
+					new FloatingField( diff, {targetEl : this._elementFields[ index ]})	
+				}
 				this._elementValues[ index ] = value;
 				this._elementFields[ index ].innerHTML = this._elementNames[ index ] + ": <br/>" + value;
 			}
@@ -940,16 +1200,27 @@ let Game = (function(namespace){
 				return this._elementValues[ index ];
 			}
 		}
-		subtractFromElement ( index, value ) {
-			console.log("Player.subtractFromElement( "+index+", "+value+")");
+		subtractFromElement ( index, value, animate ) {
+			// console.log("Player.subtractFromElement( "+index+", "+value+")");
 			if ( index === Number.parseInt( index, 10 ) && typeof value === "number" ) {
-				this.setElement( index, this.getElement( index ) - value );
+				this.setElement( index, this.getElement( index ) - value, animate );
 			}
 		}
-		addToElement ( index, value ) {
+		addToElement ( index, value, animate ) {
 			if ( index === Number.parseInt( index, 10 ) && typeof value === "number" ) {
-				this.setElement( index, this.getElement( index ) + value );
+				this.setElement( index, this.getElement( index ) + value, animate );
 			}
+		}
+		addToElements ( values, animate ) {
+			// console.log("Player.addToElements("+values+")");
+			if ( Array.isArray( values ) && values.length === this.elementValues.length ) {
+				for ( let i = 0; i < values.length; i++ ) {
+					this.addToElement( i, values[i], animate );
+				}
+			}
+		}
+		get rack () {
+			return this._rack;
 		}
 		// getters & setters
 		get name () {
@@ -957,6 +1228,11 @@ let Game = (function(namespace){
 		}
 		set hp ( value ) {
 		 	if ( value != undefined ) {
+		 		let oldValue = this._hp;
+		 		let diff = value - oldValue;
+		 		if ( diff != 0 ) {
+		 			new FloatingField ( diff, {targetEl:this.hpField} );
+		 		}
 		 		this._hp = value;
 		 		this.hpField.textContent = value;
 		 	}
@@ -971,10 +1247,13 @@ let Game = (function(namespace){
 			if ( Array.isArray( ar ) ) {
 				for ( let i = 0; i < this._elementValues.length; i++ ) {
 					if ( typeof ar[0] === "number") {
-						this._elementValues[i] = ar[i];
+						this.setElement( i, ar[i] );
 					}
 				}
 			}
+		}
+		get powers () {
+			return this._elementValues.slice(0);
 		}
 		set x( value ) {
 			if ( value != undefined ) {
@@ -998,9 +1277,9 @@ let Game = (function(namespace){
 	//
 	///////////////////////////////
 	class HumanPlayer extends Player {
-		constructor ( portraitSrc ) {
+		constructor ( name, portraitSrc ) {
 			console.log("HumanPlayer constructor()");
-			super( portraitSrc );
+			super( name, portraitSrc );
 		}
 		init () {
 			super.init();
@@ -1050,9 +1329,9 @@ let Game = (function(namespace){
 	//
 	///////////////////////////////
 	class AIPlayer extends Player {
-		constructor ( portraitSrc ) {
+		constructor ( name, portraitSrc ) {
 			console.log("AIPlayer constructor()");
-			super( portraitSrc );
+			super( name, portraitSrc );
 			// this.deck.removeEl();
 		}
 		assemble(){
@@ -1079,7 +1358,17 @@ let Game = (function(namespace){
 
 
 
+/*
 
+########     ###     ######  ##    ##     ######  ##          ###     ######   ######  
+##     ##   ## ##   ##    ## ##   ##     ##    ## ##         ## ##   ##    ## ##    ## 
+##     ##  ##   ##  ##       ##  ##      ##       ##        ##   ##  ##       ##       
+########  ##     ## ##       #####       ##       ##       ##     ##  ######   ######  
+##   ##   ######### ##       ##  ##      ##       ##       #########       ##       ## 
+##    ##  ##     ## ##    ## ##   ##     ##    ## ##       ##     ## ##    ## ##    ## 
+##     ## ##     ##  ######  ##    ##     ######  ######## ##     ##  ######   ######  
+
+*/
 
 
 
@@ -1109,26 +1398,28 @@ let Game = (function(namespace){
 				let slot = new Slot( this, i );
 				this._slots.push( slot );
 				this._myEl.appendChild( slot.el );
-				slot.x = i * cardWidth;
+				slot.x = i * ( cardWidth +4 );
 			}
 		}
 
 		assemble(){
 			gameContainer.appendChild( this._myEl );
-			this.width = 6*cardWidth;
+			this.width = 6*(cardWidth+4);
 			this.height = cardHeight;
 		}
 
 		putCardInSlot ( card, slotArg ) {
-
 			// argument [slotArg] is instance of Slot or is an integer
 			let slot = slotArg instanceof Slot ? slotArg :  this._slots[ slot ];
 
 			if ( card instanceof Card && slot instanceof Slot ) {
 				slot.card = card;
-				card.owner = this.player;
+				card.lock();
+				card.undim();
+				// card.owner = this.player; // Already gets .owner when Deck is dealt
 				// card.x = this._x + slot.x;
 				// card.y = this._y + slot.y;
+				Sounds.flip.play();
 			}
 		}
 
@@ -1156,6 +1447,9 @@ let Game = (function(namespace){
 			return false;
 		}
 		get player () {
+			return this._player;
+		}
+		get owner () {
 			return this._player;
 		}
 	}
@@ -1205,9 +1499,11 @@ let Game = (function(namespace){
 					card.changeParent(this.el);
 					card.x = 0;//this.x + this.rack.x;
 					card.y = 0;//this.y + this.rack.y;
+					// animate card into this slot
+					// TweenMax.set(card.el, {z:2});
+					card.el.style.zIndex = 60; //10+length*3+a;
+					TweenMax.from(card.el, 0.25, {z:"+=100", rotationX: "+=10", ease:Sine.easeIn});
 				}
-				// animate card into this slot
-				
 			}
 		}
 		get index () {
@@ -1224,7 +1520,17 @@ let Game = (function(namespace){
 
 
 
+/*
 
+########  ########  ######  ##    ##     ######  ##          ###     ######   ######  
+##     ## ##       ##    ## ##   ##     ##    ## ##         ## ##   ##    ## ##    ## 
+##     ## ##       ##       ##  ##      ##       ##        ##   ##  ##       ##       
+##     ## ######   ##       #####       ##       ##       ##     ##  ######   ######  
+##     ## ##       ##       ##  ##      ##       ##       #########       ##       ## 
+##     ## ##       ##    ## ##   ##     ##    ## ##       ##     ## ##    ## ##    ## 
+########  ########  ######  ##    ##     ######  ######## ##     ##  ######   ######  
+
+*/
 
 
 
@@ -1244,24 +1550,43 @@ let Game = (function(namespace){
 			gameContainer.appendChild(this.el);
 			// $(this.el).addClass( "card-deck" );
 			this._cards_ar = [];
-			this.init();
 			this._player = player;
+			this.init();
 		}
 
 		init () {
 			// Build deck of cards
 			// col = element-index, row = power (cost-range)
+			// TEMP FOR TESTING	v
+			let names = ["Minotaur Commander", "Giant Spider","Meditation","Ice Guard", "Nature’s Fury", "Call to Thunder", "Orc Chieftain", "Forest Sprite", "Tornado", "Master Healer", "Water Elemental", "Wall of Lightning"]; //"Hydra", "Inferno",
+			let musts = [];
+			for ( let name of names ) {
+				musts.push( Game.makeCardByName( name ) );
+			}
+			
 			for( let col = 0; col < 4; col++ ) {
 				for( let row = 0; row < 4; row++ ) {
 					// pick a cost from range -> 1-3, 4-6, 7-9, 10-12
-					let cost = row * 3 + Math.floor( Math.random() * 3 ) + 1;
-					let card = Game.pickCard( col, cost );
+					// TEMP FOR TESTING	v FORCE CARDS IN DECK
+					let card;
+					for ( let must of musts ) {
+						if ( col === must.elementIndex && must.cost > (row*3) && must.cost <= (row*3 + 3) ) {
+							card = must;
+							break;
+						}
+					} 
+					if (card === undefined) {
+						let cost = row * 3 + Math.floor( Math.random() * 3 ) + 1;
+						card = Game.pickCard( col, cost );
+					}
+					
 					// $(card.el).detach();
 					// $(this.el).append(card.el);
 					card.changeParent(this.el);
 					card.x = col * cardWidth;
 					card.y = row * cardHeight;
 					this._cards_ar.push(card);
+					card.owner = this.player; 
 				}
 			}
 		}
@@ -1299,7 +1624,7 @@ let Game = (function(namespace){
 		}
 
 		hilite () {
-			console.log("Deck.hilite()");
+			// console.log("Deck.hilite()");
 			for (let c = 0; c < this._cards_ar.length; c++ ) {
 				let card = this.cards_ar[c];
 				card.hilite();
@@ -1366,8 +1691,187 @@ let Game = (function(namespace){
 
 
 
+/*
+
+d88888b db       .d88b.   .d8b.  d888888b d888888b d8b   db  d888b       d88888b d888888b d88888b db      d8888b. 
+88'     88      .8P  Y8. d8' `8b `^^88^^'   `88'   888o  88 88' Y8b      88'       `88'   88'     88      88  `8D 
+88ooo   88      88    88 88ooo88    88       88    88V8o 88 88           88ooo      88    88ooooo 88      88   88 
+88~~~   88      88    88 88~~~88    88       88    88 V8o88 88  ooo      88~~~      88    88~~~~~ 88      88   88 
+88      88booo. `8b  d8' 88   88    88      .88.   88  V888 88. ~8~      88        .88.   88.     88booo. 88  .8D 
+YP      Y88888P  `Y88P'  YP   YP    YP    Y888888P VP   V8P  Y888P       YP      Y888888P Y88888P Y88888P Y8888D' 
+                                                                                                                  
+*/                                                                                                                  
 
 
+	////////////////////////////////////////////
+	//
+	// 		FLOATING FIELD CLASS ( gui )
+	//
+	////////////////////////////////////////////
+	class FloatingField extends GameElement {
+
+		constructor ( txt, optionsObj ) {
+			// console.log("new FloatingField()");
+			let _el = document.createElement("span");
+			gameContainer.appendChild(_el);
+			super( _el );
+			
+			this.init ( txt, optionsObj );
+		}
+
+		init ( txt, optionsObj ) {
+			$(this.el).addClass( 'floating-field' );
+			this.el.innerHTML = txt;
+			if ( !isNaN( txt ) ) {
+				let colorClass = Number ( txt ) >= 0 ? "green" : "red";
+				$(this.el).addClass( colorClass );
+			}
+			this.el.style.zIndex = 10000;
+			let x = 0, y = 0;
+			if ( optionsObj.targetEl != undefined && optionsObj.targetEl instanceof Element ) {
+				let point = Game.getElementCenterGlobal ( optionsObj.targetEl );
+				x = point.x;
+				y = point.y;
+			} else if ( optionsObj.point != undefined ){
+				x = optionsObj.point.x;
+				y = optionsObj.point.y;
+			}
+			this.x = x;
+			this.y = y;
+			TweenMax.set( this.el, {css:{z:"+=15"} });
+			this.fade( -1 );
+		}
+
+		fade ( dir ) {			
+			// fade out while drifting up or down
+			let dur = 2;
+			let ty = this.height * dir;
+			TweenMax.to( this.el, dur, {css:{y:"+="+ty}, ease:Sine.easeOut, onComplete: complete});
+			TweenMax.to( this.el, dur*0.25, {css:{opacity: 0}, delay: dur*0.75, ease:Sine.easeInOut});
+			let that = this;
+			function complete() {
+				that.kill();
+			}
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	/*
+
+	 ######  ########  ######## ##       ##        ######  
+	##    ## ##     ## ##       ##       ##       ##    ## 
+	##       ##     ## ##       ##       ##       ##       
+	 ######  ########  ######   ##       ##        ######  
+	      ## ##        ##       ##       ##             ## 
+	##    ## ##        ##       ##       ##       ##    ## 
+	 ######  ##        ######## ######## ########  ######  
+	*/
+
+	// 		SPELLS OBJECT
+
+		let Spells = {};
+
+		Spells.checkCardHasSpellFunction = function ( card ) {
+			// console.log("Spells.checkCardHasSpellFunction()");
+			for ( let spell of Spells.spellFunctionsTable ) {
+				if ( card.name === spell.name ) {
+					// console.log("spell",spell);
+					// Call Function
+					spell.func();
+					return true;
+				}
+			}
+			return false;
+		}
+
+		Spells.naturesFury = function () {
+			console.log("Spells.naturesFury()");
+			// Nature's Fury
+			let cards = Game.getAllCardsInRack( Game.activePlayer.rack );
+			// Create array of caster's creatures' attacks
+			let attacks = [];
+			for ( let card of cards ) {
+				attacks.push( card.attack );
+			}
+			// Arrange the array highest to lowest
+			attacks.sort(function(a, b) {
+			  return b - a;
+			});
+			// Add the first two
+			attacks = attacks.slice(0,2);
+			let damage = 0;
+			for ( let attack of attacks ) {
+				damage += attack;
+			}
+			// Do that damage to opponent
+			damage = Game.checkSpecialDefend ( Game.passivePlayer, damage, true );
+			Game.passivePlayer.takeDamage(damage);
+		}
+
+		Spells.spellFunctionsTable = [
+
+			{ name : "Nature’s Fury", func : Spells.naturesFury }
+
+		];
+
+
+
+
+
+
+
+
+
+
+/*
+	 ######      ###    ##     ## ########     #######  ########        ## ########  ######  ######## 
+	##    ##    ## ##   ###   ### ##          ##     ## ##     ##       ## ##       ##    ##    ##    
+	##         ##   ##  #### #### ##          ##     ## ##     ##       ## ##       ##          ##    
+	##   #### ##     ## ## ### ## ######      ##     ## ########        ## ######   ##          ##    
+	##    ##  ######### ##     ## ##          ##     ## ##     ## ##    ## ##       ##          ##    
+	##    ##  ##     ## ##     ## ##          ##     ## ##     ## ##    ## ##       ##    ##    ##    
+	 ######   ##     ## ##     ## ########     #######  ########   ######  ########  ######     ##    
+*/
 
 
 
@@ -1386,30 +1890,36 @@ let Game = (function(namespace){
 	////////////////////////////
 	///////////////
 
-	let Game = {};
+	var Game = {};
 
 	Game.turnNum = 0;
-	Game.turnPhase = 0; // 0 = human, 1 = AI
-	Game.turnPhasePortion = ""; // "start", "end"
+	Game.playerUp = 0; // 0 = human, 1 = AI
+	Game.turnPhase = ""; // "start", "playCard", "combat", "end"
 	Game.activePlayer = null;
 	Game.passivePlayer = null;
 	Game.selectedCard = null;
 	Game.gameOver = false;
+	Game.specialsQueue = [];
+	Game.boostQueue = [0,0,0,0];
+	// Game.castingCard = null;
+	Game.specialWhichNeedsTarget = null;
+	Game.targetCard = null;
 
 	Game.initGame = function() {
 		console.log("Game.initGame()");
 		// Game.createTempCardSet();
 		Game.buildSourceDeckFromData( cards_dataObj );
+		let topGap = 100;
 		// -----------------------------------------------
 		// Make Players, Human and AI
 		// -----------------------------------------------
-		computerPlayer = new AIPlayer( "AI Character" );
+		computerPlayer = new AIPlayer( "AI Character", "portrait-AI.jpg" );
 		computerPlayer.x = 70;
-		computerPlayer.y = 0;
-		computerPlayer.setElement(0, 8);
-		computerPlayer.setElement(1, 5);
-		computerPlayer.setElement(2, 10);
-		computerPlayer.setElement(3, 3);
+		computerPlayer.y = topGap;
+		computerPlayer.setElement(0, 4);
+		computerPlayer.setElement(1, 4);
+		computerPlayer.setElement(2, 4);
+		computerPlayer.setElement(3, 4);
 		computerPlayer.deck.flipCards( true );
 		// console.log("computerPlayer.deck: "+computerPlayer.deck);
 		// computerPlayer.deck.removeEl();
@@ -1423,13 +1933,13 @@ let Game = (function(namespace){
 		
 		// $(gameContainer).append($(AICardGrid));
 
-		livePlayer = new HumanPlayer( "Player" );
+		livePlayer = new HumanPlayer( "Player", "portrait-player.jpg" );
 		livePlayer.x =  70;
-		livePlayer.y = 240;
-		livePlayer.setElement(0, 5);
-		livePlayer.setElement(1, 10);
+		livePlayer.y = 240+topGap;
+		livePlayer.setElement(0, 12);
+		livePlayer.setElement(1, 1);
 		livePlayer.setElement(2, 3);
-		livePlayer.setElement(3, 8);
+		livePlayer.setElement(3, 1);
 
 		// Position Human player's cards
 		$(livePlayer.deck.el).detach();
@@ -1439,11 +1949,39 @@ let Game = (function(namespace){
 
 	Game.startGame = function () {
 		console.log("Game.startGame()");
+		Game.activePlayer = computerPlayer;
 		livePlayer.deck.flipCards();
 		// wait is magic number, to wait for all the human player's cards to flip over before unlocking them
 		let wait = setTimeout( Game.startTurn, 2500 );
 		
 	}
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+d888888b db    db d8888b. d8b   db      d8888b.  .d8b.  d8888b. d888888b .d8888. 
+`~~88~~' 88    88 88  `8D 888o  88      88  `8D d8' `8b 88  `8D `~~88~~' 88'  YP 
+   88    88    88 88oobY' 88V8o 88      88oodD' 88ooo88 88oobY'    88    `8bo.   
+   88    88    88 88`8b   88 V8o88      88~~~   88~~~88 88`8b      88      `Y8b. 
+   88    88b  d88 88 `88. 88  V888      88      88   88 88 `88.    88    db   8D 
+   YP    ~Y8888P' 88   YD VP   V8P      88      YP   YP 88   YD    YP    `8888Y' 
+                                                                                 
+*/                                                                                                                                         
+
+
+
+
+
 
 	/////////////////////////////////////////////////
 	//
@@ -1451,47 +1989,78 @@ let Game = (function(namespace){
 	//
 	/////////////////////////////////////////////////
 	Game.startTurn = function () {
-		console.log("Game.startTurn()");
+		// console.log("Game.startTurn()");
 		if ( Game.gameOver ) return;
 		Game.turnNum ++;
-		console.log( "Turn "+Game.turnNum );
-		console.log("---------------------------------");
 		console.log("\r\n");
-		
+		console.log("------START TURN ("+Game.turnNum+") ---> ------------------------");
 		$(turnCountField).html("Turn <br />"+Game.turnNum);
-		Game.turnPhase = 0;
+		Game.playerUp = 0;
 		Game.startPhase();
 	}
+
 	Game.startPhase = function () {
-		console.log("Game.startPhase()");
-		console.log("Game.turnPhase: "+Game.turnPhase);
-		console.log("---------------------------------");
+		// console.log("Game.startPhase()");
+		console.log("\r\n");
+		console.log("-----START PHASE ("+Game.playerUp+")---> -------------------------");
 		if ( Game.gameOver ) return;
+
+		Game.turnPhase = "start";
 		Game.selectedCard = null;
-		Game.activePlayer = Game.turnPhase === 0 ? livePlayer : computerPlayer;
+		Game.activePlayer = Game.playerUp === 0 ? livePlayer : computerPlayer;
 		Game.passivePlayer = Game.activePlayer === livePlayer ? computerPlayer : livePlayer;
+		Game.arrangeRackDepths();
+
+		// Check all cards for start-phase specials ( owner-turn-start, opponent-turn-start )
+		Game.enqueueStartPhaseSpecials();
+		// ^ this function Enqueues those specials
+		// and sets aside Power boosts
 		
 		// Add Element points (+1 default)
 		Game.updatePlayerElementPoints();
-		Game.unlockPlayableCards( Game.activePlayer );
-		Game.turnPhasePortion = "start";
-		if ( Game.turnPhase === 0 ) {
-			Game.startHumanPhase();
-		} else if ( Game.turnPhase === 1 ) {
-			Game.startAIPhase();
-		}
-	}
-	Game.startHumanPhase = function() {
-		console.log("Game.startHumanPhase()");
+
+		// Execute the queue
+		Game.executeSpecials( function () {
+			Game.unlockPlayableCards( Game.activePlayer );
+			if ( Game.playerUp === 0 ) {
+				Game.startHumanPhase();
+			} else if ( Game.playerUp === 1 ) {
+				Game.startAIPhase();
+			}
+		});
 		
 	}
+
+	Game.boostPowersPhase = function () {
+
+	}
+
+	Game.startHumanPhase = function() {
+		console.log("Game.startHumanPhase()");
+		// Can Human play a card?
+		let cards;
+		if ( livePlayer.rack.slotAvailable ) {
+			cards = livePlayer.deck.cards_ar.filter( card => !card.locked );
+		} else {
+			cards = livePlayer.deck.cards_ar.filter( card => !card.locked && card.type == "spell" );
+		}
+		if ( cards.length === 0 ) {
+			Game.showSkipButton();
+		}
+		// Wait for Human to select card
+	}
+
 	Game.startAIPhase = function () {
 		console.log("Game.startAIPhase()");
 		
 		AISelectCard ();		
 	}
+
 	Game.endPhase = function () {
-		console.log("Game.endPhase()");
+		// console.log("Game.endPhase()");
+		console.log("\r\n");
+		console.log("-----> END PHASE ("+Game.playerUp+")----------------------------");
+
 		if ( Game.gameOver ) return;
 		// Handle non-attack effects for each card
 		// ...
@@ -1502,11 +2071,12 @@ let Game = (function(namespace){
 		// Decrease host element power
 		// Decrease enemy element power
 		// Game.resolveAttacks();
-		Game.turnPhasePortion = "end";
+		Game.turnPhase = "end";
 		// Check Cards Specials
-		Game.turnPhase ++;
 
-		if ( Game.turnPhase >= 2 ) {
+		Game.playerUp ++;
+
+		if ( Game.playerUp >= 2 ) {
 			Game.endTurn();
 		} else {
 			Game.startPhase();
@@ -1519,8 +2089,11 @@ let Game = (function(namespace){
 		
 	// }
 	Game.endTurn = function () {
-		console.log("Game.endTurn()");
+		// console.log("Game.endTurn()");
+		console.log("\r\n");
+		console.log("-----> END TURN ----------------------------");
 		console.log("=============================\n\r")
+
 		Game.startTurn();
 	}
 
@@ -1549,7 +2122,49 @@ let Game = (function(namespace){
 	}
 
 
-	
+	Game.skipTurn = function() {
+		setTimeout( function() {
+			Game.resolveAttacks();
+		}, 1000);	
+	}
+
+
+	Game.showSkipButton = function () {
+		$(skipTurnButton).css("display","absolute");
+	}
+	Game.hideSkipButton = function () {
+		$(skipTurnButton).css("display","none");
+	}
+
+	// When user clicks the button...
+	$(skipTurnButton).on( "click", () => {
+		
+		Game.skipTurn();
+		Game.hideSkipButton();
+
+	} );
+
+
+
+
+
+
+
+
+
+
+/*
+
+d888888b db    db d8888b. d8b   db       .d8b.   .o88b. d888888b d888888b  .d88b.  d8b   db .d8888. 
+`~~88~~' 88    88 88  `8D 888o  88      d8' `8b d8P  Y8 `~~88~~'   `88'   .8P  Y8. 888o  88 88'  YP 
+   88    88    88 88oobY' 88V8o 88      88ooo88 8P         88       88    88    88 88V8o 88 `8bo.   
+   88    88    88 88`8b   88 V8o88      88~~~88 8b         88       88    88    88 88 V8o88   `Y8b. 
+   88    88b  d88 88 `88. 88  V888      88   88 Y8b  d8    88      .88.   `8b  d8' 88  V888 db   8D 
+   YP    ~Y8888P' 88   YD VP   V8P      YP   YP  `Y88P'    YP    Y888888P  `Y88P'  VP   V8P `8888Y' 
+                                                                                                    
+*/                                                                                                    
+
+
 
 
 	/////////////////////////////////////////////////
@@ -1558,10 +2173,35 @@ let Game = (function(namespace){
 	//
 	/////////////////////////////////////////////////
 
+	Game.queuePowerBoost = function ( boost_ar ) {
+		// Player.addToElements( ar );
+		for ( let i = 0; i < Game.boostQueue.length; i++ ) {
+			Game.boostQueue[i] = Game.boostQueue[i] + boost_ar[i];
+		}
+	}
+
+	
+	Game.chargePlayerForCard = function( card ) {
+		// console.log("Game.chargePlayerForCard()");
+		Game.activePlayer.subtractFromElement( card.elementIndex, card.cost );
+	}
+	
+
+	Game.updatePlayerElementPoints = function () {
+		// Default +1 to each element
+		Game.queuePowerBoost( [1,1,1,1] ); // Default
+		console.log("Game.boostQueue: ",Game.boostQueue);
+		Game.activePlayer.addToElements( Game.boostQueue );
+		Game.boostQueue = [0,0,0,0];	
+	}
+
+
 	Game.selectCard = function( whichCard ) {
 		console.log("Game.selectCard()");
 		Game.selectedCard = whichCard;
 	}
+
+
 	Game.clickCard = function () {
 		console.log("Game.clickCard()");
 
@@ -1569,9 +2209,7 @@ let Game = (function(namespace){
 		livePlayer.deck.deselect();
 
 		// If it's Human Player's turn
-		console.log("Game.activePlayer: "+Game.activePlayer);
-		console.log("livePlayer: "+livePlayer);
-		console.log("Game.activePlayer == livePlayer: "+(Game.activePlayer == livePlayer));
+		// console.log("Game.activePlayer == livePlayer: "+(Game.activePlayer == livePlayer));
 		if ( Game.activePlayer === livePlayer
 
 		// ...and card isn't locked...
@@ -1586,7 +2224,6 @@ let Game = (function(namespace){
 				setTimeout( function(){
 					that.unhilite();
 					livePlayer.deck.lock();
-					Game.resolveAttacks();
 				}, 100 );
 			} else if ( this.type == "creature" 
 				// Else if card is type "creature"
@@ -1621,68 +2258,174 @@ let Game = (function(namespace){
 			livePlayer.deck.lock();
 
 			// Game.endPhase();
-			Game.resolveAttacks();
 		}
 	}
 	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+	Game.AIPickTargetCard = function () {
+		/*
+				Pick an unlocked card from the racks and return it.
+		*/
+		
+		// get array of unlocked rack cards
+		let allRackCards = Game.getAllCardsInRack( computerPlayer.rack ).concat(Game.getAllCardsInRack( livePlayer.rack ));
+		let unlockedCards = allRackCards.filter( card => card.locked === false );
+
+		// Pick one.  
+		let index = Math.floor( Math.random()*unlockedCards.length );
+		return unlockedCards[ index ];
+	}
+
+
+
 	
 	Game.playSpellCard = function ( card ) {
-		console.log("Game.playSpellCard()");
+		console.log("Game.playSpellCard("+card.name+")");
+		
+		// If spell requires target card...
+		if ( Game.specialCheckTargetRequired( card ) ) {
+			// console.log("targetRequired?",Game.specialCheckTargetRequired( card ))
+			Game.targetCard = null;
+			
+			// If AI turn, make it pick card...
+			if ( Game.activePlayer == computerPlayer ) {
+				// Select a target card
+				Game.AIPickTargetCard().select();
+			}
+			
+		} else if ( Spells.checkCardHasSpellFunction( card ) ) {
+			Game.completePlaySpellCard( card );
+		} else {
+			Game.completePlaySpellCard( card );
+		}
+	}
+
+
+	Game.completePlaySpellCard = function ( card ) {
+		console.log("Game.completePlaySpellCard("+card.name+")");
+		Game.executeCastPhaseSpecials( card );
 		Game.chargePlayerForCard( card );
+		Sounds.spell.play();
 
-		// Temp - just attack opponenet w/ card's attack value
-		console.log("card.attack: "+card.attack);
-		Game.passivePlayer.takeDamage( card.attack );
+		// Is a player defeated?
 		Game.checkGameOver();
-
-		// Game.resolveAttacks();
-
-		// Does the spell operate automatically?
-
-			// on the Active player?
-
-			// and/or on the Passive player?
-
-			// and/or on Active player card?
-
-			// and/or on Passive player card?
-
-		// Or does spell require clicking on a target card?
-
-			// Owner's card?
-
-			// Opponent's card?
+		if ( !Game.gameOver ) {
+			setTimeout( function() {
+				Game.resolveAttacks();
+			}, 1000);			
+		}
 
 	}
 
+	Game.specialCheckTargetRequired = function ( card ) {
+		console.log("Game.specialCheckTargetRequired()");
+		let specials = Game.getCardSpecialsOfType( card, "cast" );
+		for ( let special of specials ) {
+			if ( special.target.includes ("target") ) {
+				Game.specialWhichNeedsTarget = special;
+				switch ( special.target ) {
+					case "owner-target-creature":
+						Game.makeTargetCardsSelectable( Game.activePlayer.rack );
+						break;
+					case "opponent-target-creature":
+						Game.makeTargetCardsSelectable( Game.passivePlayer.rack );
+						break;
+					default:
+						break;
+				}
+				return true;
+				break;
+			}
+		}
+		return false;
+	}
+
+	Game.makeTargetCardsSelectable = function ( rack ) {
+		console.log("Game.makeTargetCardsSelectable()");
+		// Handle clicking cards
+		for ( let  card of Game.getAllCardsInRack( rack ) ) {
+			console.log("making ["+card.name+"] selectable");
+			card.unlock();
+			card.setSelectBehavior( Game.chooseCardForSpell );
+			card.hilite();
+		}
+	}
+
+	Game.chooseCardForSpell = function ( ) {
+		console.log("Game.chooseCardForSpell("+this.name+")");
+		Game.specialWhichNeedsTarget.targetCard = this;
+		 
+		for ( let  card of Game.getAllCardsInRack( this.slot.rack ) ) {
+			card.removeSelectBehavior();
+			card.lock();
+			card.undim();
+			card.unhilite();
+		}
+
+		Game.completePlaySpellCard( Game.specialWhichNeedsTarget.card );
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 	Game.playCreatureCard = function ( card, slot ) {
+		// console.log("Game.playCreatureCard( "+card.name+")")
 		
 		Game.chargePlayerForCard( card );
 
 		let dupCard = Game.duplicateCard( card );
-		dupCard.undim();
 
 		Game.activePlayer.rack.putCardInSlot( dupCard, slot );
 		
+		// Game.checkSummonCardForSpecial( dupCard );
+		setTimeout ( function() {
+			Game.enqueueSummonPhaseSpecials( dupCard );
+			Game.executeSpecials( function() {
+				Game.resolveAttacks();	
+			});
+		}, 300 );
+
 	}
 
-	Game.chargePlayerForCard = function( card ) {
-		// console.log("Game.chargePlayerForCard()");
-		Game.activePlayer.subtractFromElement( card.elementIndex, card.cost );
-	}
-	Game.updatePlayerElementPoints = function () {
-		// Default +1 to each element
-		for ( let i = 0; i < Game.activePlayer.elementValues.length; i++ ) {
-			Game.activePlayer.addToElement( i, 1 );	
-		}
-	}
+
+
 	Game.resolveAttacks = function() {
-		Game.arrangeRackDepths();
+		// console.log("Game.resolveAttacks()");
+		
 		let slotIndexes = [];
 		for ( let s = 0; s < Game.activePlayer.rack.slots.length; s++ ) {
 			// Check each slot for a card
 			let card = Game.activePlayer.rack.slots[s].card;
-			if ( card != undefined && card.turnPlayed < Game.turnNum ) {
+			// if ( card != undefined) console.log(card.title+" turnPlayed vs turnNum : "+( card.turnPlayed + " vs " +Game.turnNum));
+			if ( card != undefined && card.turnPlayed < Game.turnNum && card.attack > 0 ) {
 				// Cards by default can't attack on the same turn that they are played
 				slotIndexes.push( s );
 			}
@@ -1691,29 +2434,27 @@ let Game = (function(namespace){
 			// If Player has any cards in rack...
 			let si = 0;
 			let attackWait = setInterval( function() {
-				console.log("Game.resolveAttacks(), setInterval");
-				// let curplayer = Game.activePlayer == livePlayer ? "Human" : "Computer";
-				// console.log("Player: "+curplayer);
-				// console.log("si vs slotIndexes.length:"+si+" ... "+slotIndexes.length);
+
 				// execute card's attack
 				Game.cardAttack( slotIndexes[ si ] );
-				si++;
 				
+				si++;
 				if ( si >= slotIndexes.length || Game.gameOver ) {
 					clearInterval( attackWait );
-					let wait = setTimeout( Game.endPhase, 1000 );
+					let wait = setTimeout( Game.endPhase, 1500 );
 				}
 			}, 1000 );
+
 		} else {
 			let wait = setTimeout( Game.endPhase, 1000 );
 		}
 	}
+
 	Game.cardAttack = function ( slotIndex ) {
-		console.log("Game.cardAttack( "+slotIndex+" )");
+		// console.log("Game.cardAttack( "+slotIndex+" )");
 		if ( Game.gameOver ) {
 			return;
 		}
-		console.log("...executing Game.cardAttack()");
 		let card = Game.activePlayer.rack.slots[ slotIndex ].card;
 		let defenderCard = Game.passivePlayer.rack.slots[ slotIndex ].card;
 		if ( card != undefined ) {
@@ -1723,7 +2464,7 @@ let Game = (function(namespace){
 			if ( Game.activePlayer === livePlayer ) {
 				// Slide up
 				ty = -30;
-			}else {
+			} else {
 				// Slide down
 				ty = +30;
 			}
@@ -1731,23 +2472,53 @@ let Game = (function(namespace){
 			TweenMax.to( card.shadow, dur, {css:{y:"+="+ty}, yoyo:true, repeat:1, ease:Sine.easeInOut});
 	
 			function complete() {
-				console.log("Tween Complete()");
 				
-				if ( defenderCard == undefined ) {
-					// no card, attack goes through to passivePlayer
-					Game.passivePlayer.takeDamage( card.attack );
-				}else {
-					// attack defender's card
-					defenderCard.takeDamage( card.attack );
+				// Check for attacking card has Special of event:"attack"
+				if ( Game.cardHasSpecialOfType( card, "attack" ) ) {
+					// Don't do physical attack
+					// console.log(card.name+" has special eventtype attack");
+				} else {
+					if ( defenderCard == undefined ) {
+						// no card, attack goes through to passivePlayer
+						let damage = Game.checkSpecialDefend ( Game.passivePlayer, card.attack, false );
+						Game.passivePlayer.takeDamage( damage );
+						// Check for Player "defend" special with target "owner" in Player's cards
+					} else {
+						// attack defender's card
+						let damage = Game.checkSpecialDefend ( defenderCard, card.attack, false );
+						defenderCard.takeDamage( damage );
+						// Check for "defend" special with target: "self", "neighbor" or "sibling" 
+					}	
 				}
-
+				Game.executeAttackPhaseSpecials( card );
 				// Is a player defeated?
 				Game.checkGameOver();
-				
 			}
+			Sounds.attack.currentTime = 0;
+			Sounds.attack.play();
 			
 		}
 	}
+
+
+
+
+
+
+
+
+
+/*
+
+db    db d888888b d888888b db      d888888b d888888b d888888b d88888b .d8888. 
+88    88 `~~88~~'   `88'   88        `88'   `~~88~~'   `88'   88'     88'  YP 
+88    88    88       88    88         88       88       88    88ooooo `8bo.   
+88    88    88       88    88         88       88       88    88~~~~~   `Y8b. 
+88b  d88    88      .88.   88booo.   .88.      88      .88.   88.     db   8D 
+~Y8888P'    YP    Y888888P Y88888P Y888888P    YP    Y888888P Y88888P `8888Y' 
+                                                                              
+*/                                                                              
+
 
 
 
@@ -1757,8 +2528,16 @@ let Game = (function(namespace){
 	//
 	/////////////////////////////////////////////////
 
+
+
+	Game.displayCardDescription = function ( card ) {
+		let	txt = card == undefined ? "" : card.description;
+		cardDescriptionField.innerHTML = txt;
+	}
+
 	Game.arrangeRackDepths = function () {
 		// Put attacking Player's rack above defender's
+		// console.log("Game.arrangeRackDepths()");
 		let aSlots = Game.activePlayer.rack.slots;
 		let pSlots = Game.passivePlayer.rack.slots;
 		let length = aSlots.length;
@@ -1777,7 +2556,9 @@ let Game = (function(namespace){
 	}
 
 	Game.duplicateCard = function ( card ) {
+		// console.log("Game.duplicateCard()");
 		// Duplicate that card
+		/*
 		let dupCard = new Card(
 		card.elementIndex,
 		card.attack,
@@ -1786,16 +2567,21 @@ let Game = (function(namespace){
 		card.cost,
 		card.img,
 		card.title,
-		card.type);
+		card.type,
+		(card.specials),
+		card.description,
+		cloneObject(card.misc)
+		);
+		*/
 		// Place face up on top of original card
-		dupCard.x = card.x;
-		dupCard.y = card.y;
+		// dupCard.x = card.x;
+		// dupCard.y = card.y;
+		let dupCard = Game.makeCardByName( card.name );
+		dupCard.owner = card.owner;
 		dupCard.flip( true );
 		
 		return dupCard;
 	}
-
-
 
 	Game.positionElement = function( el, x, y ) {
 		$(el).css({top: y, left: x});
@@ -1810,6 +2596,126 @@ let Game = (function(namespace){
 		let pos = $(el).position();
 		return { x: pos.left, y: pos.top };
 	}
+	Game.getElementCenterGlobal = function ( el ) {
+		// relative to gameContainer
+		let gcOffset = $(gameContainer).offset();
+		let pos = $(el).offset();
+		pos.left += Game.getElementWidth( el )*0.5 - gcOffset.left;
+		pos.top += Game.getElementHeight( el )*0.5 - gcOffset.top;
+		return { x: pos.left, y: pos.top };
+	}
+
+
+	Game.getAllCardsInRack = function( rack, excludeCard ) {
+		let cards = [];
+		for ( let s = 0; s < rack.slots.length; s++ ) {
+			let card = rack.slots[s].card;
+			if ( card instanceof Card && card != excludeCard ) {
+				cards.push( card );
+			}
+		}
+		return cards;
+	}
+
+	Game.getSiblings = function ( card ) {
+		let cards = Game.getAllCardsInRack( card.owner.rack, card );
+		return cards;
+	}
+
+	Game.getCardNeighbors = function ( card ) {
+		// console.log("Game.getCardNeighbors( "+card.name+" )");
+		let cards = [];
+		// Get card's slot index
+		let index = card.slot.index;
+		if ( index > 0 ) {
+			// Get slot to left
+			let leftSlot = card.slot.rack.slots[ index -1 ];
+			if ( leftSlot.card != undefined ) {
+				cards.push( leftSlot.card );
+				// console.log("found card to left");
+			}
+		}
+		if ( index < card.slot.rack.slots.length -1 ) {
+			// Check Slot to right
+			let rightSlot = card.slot.rack.slots[ index + 1];
+			if ( rightSlot.card != undefined ) {
+				cards.push( rightSlot.card );
+				// console.log("found card to right")
+			}
+		}
+		return cards;
+	}
+
+	Game.getCardAcross = function ( card ) {
+		let index = card.slot.index;
+		let opponent = Game.getOpponent( card.owner );
+		return opponent.rack.slots[ index ].card;
+	}
+
+	Game.getOpponent = function ( player ) {
+		return player === Game.activePlayer ? Game.passivePlayer : Game.activePlayer;
+	}
+
+	Game.getNeighborSlots = function ( slot ) {
+		let neighborSlots = [];
+		let index = slot.index;
+		if ( index > 0 ) {
+			// Get slot to left
+			neighborSlots.push( slot.rack.slots[ index -1 ] );
+		}
+		if ( index < slot.rack.slots.length -1 ) {
+			// Check Slot to right
+			neighborSlots.push( slot.rack.slots[ index + 1] );
+		}
+		return neighborSlots;
+	}
+	Game.getSiblingSlots = function ( slot ) {
+		let slots = [];
+		for ( let s = 0; s < slot.rack.slots.length; s++ ) {
+			if ( s != slot.index ) {
+				slots.push( slot );	
+			}
+		}
+		return slots;
+	}
+
+	Game.getEmptySlots = function ( slots ) {
+		// return array of empty slots
+		for ( let i = slots.length-1; i >= 0; i-- ) {
+			if ( slots[i].card != undefined ) {
+				slots.splice( i, 1 );
+			}
+		}
+		return slots;
+	}
+
+
+/*	Game.cardFlex = function ( card ) {
+		let dur = 0.35;
+		let flexTween = TweenMax.to( card.el, dur, {z:50, yoyo:true, repeat:1, ease:Sine.easeOut, onComplete: complete});
+		function complete () {
+			TweenMax.set(this.target, {z:2});
+		}
+	}
+*/
+
+
+
+
+
+/*
+
+ d888b   .d8b.  .88b  d88. d88888b      d8888b. d88888b  .o88b. db   dD 
+88' Y8b d8' `8b 88'YbdP`88 88'          88  `8D 88'     d8P  Y8 88 ,8P' 
+88      88ooo88 88  88  88 88ooooo      88   88 88ooooo 8P      88,8P   
+88  ooo 88^^^88 88  88  88 88^^^^’      88   88 88^^^^’ 8b      88`8b   
+88. ~8~ 88   88 88  88  88 88.          88  .8D 88.     Y8b  d8 88 `88. 
+ Y888P  YP   YP YP  YP  YP Y88888P      Y8888D' Y88888P  `Y88P' YP   YD 
+                                                                        
+                                                                        
+*/                                                                        
+
+
 
 	/////////////////////////////////////////////////
 	//
@@ -1839,21 +2745,42 @@ let Game = (function(namespace){
 	*/
 
 	Game.buildSourceDeckFromData = function ( dataObj ) {
+		console.log("Game.buildSourceDeckFromData()");
+		console.log("dataObj.elements.length: "+dataObj.elements.length);
 		for ( let e = 0; e < dataObj.elements.length; e++ ) {
+			console.log("element: "+e);
 			let element = dataObj.elements[e];
+			// if ( e == 4 || e == 0 ) {
+			// 	console.log(element);
+			// }
 			for ( let c = 0; c < element.cards.length; c++ ) {
 				let card = element.cards[c];
 				let def = card.defense != undefined ? card.defense : 0;
+				let img = card.img == undefined ? "images/sample-image.jpg" : "images/"+card.img;
+				let misc = card.misc != undefined ? card.misc : {};
+				for ( let special of card.specials ) {
+					if ( special.misc === undefined ) {
+						special.misc = {};
+						// ? 
+					}
+					special.isNonPhysical = special.isNonPhysical === true;
+				}
+				// TEMP
+				// if ( card.type == "spell" ) {
+				// 	card.attack = Math.round( card.cost * 1.5 );
+				// }
 				Game.cards_ar.push( 
 					{ type : card.type, 
 					elementIndex : e, 
 					attack : card.attack, 
 					defense : def, 
 					cost : card.cost, 
-					src : "images/sample-image.jpg", 
+					img : img, 
 					name : card.name, 
 					hp : card.life,
-					specials : card.specials
+					specials : card.specials,
+					description : card.description,
+					misc : misc
 					 }
 				 );
 			}
@@ -1861,6 +2788,7 @@ let Game = (function(namespace){
 	}
 	// TEMP GENERATE ARTIFICIAL CARD TYPES:
 	// ALL CARDS
+	/*
 	Game.createTempCardSet = function () {
 		// All the cards, from which "Decks" are selected, using "Game.pickCard()"
 		let names = ["supply", "downtime", "product", "incentive"];
@@ -1876,11 +2804,15 @@ let Game = (function(namespace){
 			}
 		}
 	}
+	*/
 	
 	Game.makeCardByName = function ( name ) {
-		console.log("makeCardByName( "+name+" )")
+		// console.log("makeCardByName( "+name+" )");
 		let cards = Game.cards_ar.filter( card => card.name == name );
 		let card = cards[0]; // There is only 1 card of each name
+		// if property is an obj, pass a clone rather than reference
+		let specials = cloneObject(card.specials);
+		let misc = cloneObject(card.misc);
 		/*
 		 Also, cards should have (effects at end of owner's turn):
 
@@ -1892,8 +2824,21 @@ let Game = (function(namespace){
 		 Neighbors (creatures) HP modifiers: [x,y]
 		 Siblings (creatures) HP modifier: x
 		 */
+		return new Card ( card.elementIndex, card.attack, card.defense, card.hp, card.cost, card.img, card.name, card.type, specials, card.description, misc );
+	}
 
-		return new Card ( card.elementIndex, card.attack, card.defense, card.hp, card.cost, card.src, card.name, card.type );
+	Game.spawnCard = function ( name, slot ) {
+		console.log("Game.spawnCard( "+name+")");
+		let card = Game.makeCardByName( name );
+		card.owner = slot.rack.owner;
+		slot.rack.putCardInSlot( card, slot );
+		card.undim();
+		setTimeout ( function() {
+			card.flip();
+			Game.enqueueSummonPhaseSpecials( card, true ); // Make sure Forest Spider gets attack bonus from Minotaur
+			// Game.executeSpecials( );
+		}, 300 );
+		
 	}
 
 	Game.pickCard = function ( elementIndex, cost ) {
@@ -1907,7 +2852,7 @@ let Game = (function(namespace){
 		elegibleCards_ar = Game.cards_ar.filter( meetsCriteria );
 		// then randomly pick one.
 		let index = Math.floor( Math.random()*(elegibleCards_ar.length-1) );
-		console.log("index: "+index);
+		// console.log("index: "+index);
 		if ( index == -1 ) {
 			console.log( "tried to pickCard (elementIndex,cost): "+elementIndex+", "+cost);
 		}
@@ -1952,51 +2897,185 @@ let Game = (function(namespace){
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+/*
+
+.d8888. d8888b. d88888b  .o88b. d888888b  .d8b.  db      .d8888. 
+88'  YP 88  `8D 88'     d8P  Y8   `88'   d8' `8b 88      88'  YP 
+`8bo.   88oodD' 88ooooo 8P         88    88ooo88 88      `8bo.   
+  `Y8b. 88^^’   88^^^^’ 8b         88    88^^^88 88        `Y8b. 
+db   8D 88      88.     Y8b  d8   .88.   88   88 88booo. db   8D 
+`8888Y' 88      Y88888P  `Y88P' Y888888P YP   YP Y88888P `8888Y' 
+                                                                 
+                                                                 
+*/                                                 
+
+                // Make Specials its own object? 
+                // for organizational purposes?
+	// Singleton ?
+  //   Specials = {};
+  //   Specials.events = [
+  //   	"summon",
+  //   	"summon-neighbor",
+		// "summon-sibling",
+
+		// "owner-turn-start",
+		// "opponent-turn-start",
+
+		// attack (this card attacks) (?)
+		// neighbor-attack (?)
+		// sibling-attack (?)
+		// across-attack (?)
+		// opponent-creature-attack(?)
+
+		// "defend-self",
+		// "owner-defend",
+		// "neighbor-defend",
+
+		// "die",
+		
+		// "cast",
+		// "owner-cast"
+  //   ]
+
+
 	/////////////////////////////////////////////////
 	//
 	//			v Dev stuff for SPECIALS v
 	//
 	/////////////////////////////////////////////////
 
-
-	Game.checkLiveCardsForSpecials = function () {
-		// Look at every card in both racks
+	Game.enqueueStartPhaseSpecials = function () {
+		/*
+			Check all cards for "owner-turn-start" and "opponent-turn-start" events.
+			Enqueue Special, or enqueue Power Boost
+		*/
+		console.log("Game.enqueueStartPhaseSpecials()");
 		let activeCards = Game.getAllCardsInRack( Game.activePlayer.rack );
 		let passiveCards = Game.getAllCardsInRack( Game.passivePlayer.rack );
-		let allCards = activeCards.concat(passiveCards);
-		// For each of those cards, 
-		for ( let a = 0; a < allCards.length; a++ ) {
-			let activeCard = allCards[a];
-			let specials = activeCard.specials;
-			// Look through all its specials
-			for ( let s = 0; s < specials.length; s++ ) {
-				let special = specials[s];
-				// If a special's event type is current
-				console.log("event: "+special.event);
-				console.log("player: "+activeCard.player);
-				console.log(Game.isTimeForEvent( special.event, activeCard ));
-				if ( Game.isTimeForEvent( special.event, activeCard ) ) {
-					// Execute that special
-					Game.executeSpecial( activeCard, special );
-					console.log("Time For Special: "+activeCard.specials.event);
+		// For active cards, check owner-turn-start specials
+		for ( let card of activeCards ) {
+			console.log(" - checking "+card.name+" for owner-turn-start...");
+			for ( let special of card.specials ) {
+				if ( special.event === "owner-turn-start" ) {
+					if ( special.amount && special.amount instanceof Array && special.effect === "powers" ) {
+						Game.queuePowerBoost( special.amount );
+					} else {
+						Game.enqueueSpecial ( special );	
+					}
+					
+					console.log(" - found one!");
+				}
+			}
+		}
+		// For passive cards, check opponent-turn-start specials
+		for ( let card of passiveCards ) {
+			console.log(" - checking "+card.name+" for opponent-turn-start...");
+			for ( let special of card.specials ) {
+				if ( special.event === "opponent-turn-start" ) {
+					if ( special.amount && special.amount instanceof Array && special.effect === "powers" ) {
+						Game.queuePowerBoost( special.amount );
+					} else {
+						Game.enqueueSpecial ( special );	
+					}
+					console.log(" - found one!");
 				}
 			}
 		}
 	}
 
-	Game.getCardSpecialsOfType = function ( card, eventType ) {
+
+	Game.enqueueSummonPhaseSpecials = function ( card, executeImmediately ) {
+		/*
+				Check card for specials with "summon" event.
+				Enqueue any found.
+		*/
+		console.log(" ::: Game.enqueueSummonPhaseSpecials( "+card.name+" )");
+		executeImmediately = executeImmediately === true;
 		let specials = [];
-		for ( let s = 0; s < card.specials.length; s++ ) {
-			let special = card.specials[ s ];
-			// check if that special has correct event type
-			if ( special.event === eventType ) {
-				specials.push( special );
+		// Check Self for "summon"
+		specials = specials.concat( Game.getCardSpecialsOfType( card, "summon") );
+
+		// Check Neighbors for "summon-neighbor"
+		let neighbors = Game.getCardNeighbors( card );
+		for ( let neighbor of neighbors ) {
+			let neighborSpecials_ar = Game.getCardSpecialsOfType( neighbor, "summon-neighbor" );
+			for ( let special of neighborSpecials_ar ) {
+				// neighbors with "summon-neighbor" event should target only this card (the one just summoned)
+				// NOT TRUE!  What if card with "summon-neighbor" has target "self" ?
+				special.target = card;
+			}
+			specials = specials.concat( neighborSpecials_ar );
+
+		}
+
+		// Check Siblings for "summon-sibling"
+		let siblings = Game.getSiblings( card );
+		for ( let sibling of siblings ) {
+			let siblingSpecials_ar = Game.getCardSpecialsOfType( sibling, "summon-sibling" );
+			for ( let special of siblingSpecials_ar ) {
+				if ( special.effect === "attack" && typeof special.amount === "number" ) {
+					special.target = card;
+					// Attack booster (Minotaur Commander or Orc Chieftain)
+				} else {
+					special.target = Game.getTargetsOfSpecial( special )[0];
+					// Elemental
+				}
+				
+				//Game.getTargetsOfSpecial( special )[0];
+				// ^ Foolishly assuming targets[] here is length 1, because that's what it is when Fire Elemental targets "self"
+				// ! But not when Minotaur targets siblings
+			}
+			specials = specials.concat( siblingSpecials_ar )
+		}
+
+		// Enqueue the Specials
+		for ( let special of specials ) {
+			if ( executeImmediately ) {
+				//  We need this when multiple cards are summoned simultaneously (like Giant SPider)
+				Game.executeSpecial( special );
+			} else {
+				Game.enqueueSpecial( special );	
 			}
 		}
-		return specials;
 	}
 
-	Game.checkDyingCardForSpecial = function ( card ) {
+
+	Game.executeAttackPhaseSpecials = function ( card ) {
+		/*
+				Check card for specials with "attack" or "attack-across" event.
+				Execute any found.
+		*/
+		console.log("Game.executeAttackPhaseSpecials("+card.name+")");
+		let specials = [];
+		// check self for "attack"
+		specials = specials.concat( Game.getCardSpecialsOfType( card, "attack" ) );
+		// check across for "attack-across"
+		let acrossCard = Game.getCardAcross( card );
+		if ( acrossCard != undefined ) {
+			specials = specials.concat( Game.getCardSpecialsOfType( acrossCard, "attack-across" ) );	
+		}
+		// Execute the Specials
+		for ( let special of specials ) {
+			Game.executeSpecial( special );
+		}
+	}
+
+
+	Game.executeDyingCardSpecial = function ( card ) {
+		console.log("Game.executeDyingCardSpecial( "+card.name+" )")
 		// Call this when a card dies.
 		// Does this card have a special of event "die"?
 		let specials = Game.getCardSpecialsOfType( card, "die" );
@@ -2006,60 +3085,718 @@ let Game = (function(namespace){
 			for ( let s = 0; s < specials.length; s++ ) {
 				let special = specials[ s ];
 				// Execute that special
-				Game.executeSpecial( card, special );
-			}
-		}
-	}
-
-	Game.executeSpecial = function ( card, special ) {
-		// Execute that special
-		let targets = Game.getTargetsOfSpecial( card, special );
-
-		for ( let t = 0; t < targets.length; t++ ) {
-			if ( special.effect = "hp" ) {
-				// modify each hp
-				if ( targets[t] == undefined || targets[t].hp == undefined ) {
-					console.log("target...");
-					console.log(targets[t]);
-				}
-				targets[t].hp += special.amount;
-			} else if ( special.effect === "powers" ){
-				// add to each power
-				for ( let p = 0; p < special.amount.length; p++ ) {
-					target.addToElement ( p, special.amount[p] )
-				}
+				Game.executeSpecial( special );
 			}
 		}
 	}
 
 
-	Game.getTargetsOfSpecial = function ( card, special ) {
+
+
+	Game.enqueueSpecial = function ( special ) {
+		Game.specialsQueue.push( special );
+	}
+
+	Game.executeSpecials = function ( callback ) {
+		if ( Game.specialsQueue.length > 0 ) { 
+			Game.executeSpecial( Game.specialsQueue.pop() );
+			let specialInterval = setInterval(
+				function(){
+					if ( Game.specialsQueue.length > 0 ) {
+						Game.executeSpecial( Game.specialsQueue.pop() );
+					} else {
+						clearInterval ( specialInterval );
+						if ( callback ) {
+							callback();	
+						}
+					}		
+				},
+				1000
+				);
+		} else {
+			callback();
+		}
+	}
+/*
+	Game.executeSpecial = function ( special ) {
+		console.log("Game.executeSpecial("+special.card.name+", "+special.amount+")");
+
+		if ( !Game.testSpecialConditional( special ) ) {
+			return;
+		}
+
+		let card = special.card;
+		if ( special.effect === "spawn" ) {
+			// Spawn creature
+			Game.executeSpawnSpecial ( special );
+		//
+		} else {
+			let targets = Game.getTargetsOfSpecial( special );
+			for ( let target of targets ) {
+				Game.applySpecialAmountToTarget( special, target );
+			}
+		}
+		
+		if ( card.slot ) {
+			card.flex();	
+		}
+		
+	}
+*/
+	Game.executeSpecial = function ( special ) {
+		console.log("Game.executeSpecial("+special.card.name+", "+special.amount+")");
+
+		if ( !Game.testSpecialConditional( special ) ) {
+			return;
+		}
+
+		let card = special.card;
+		if ( special.effect === "spawn" ) {
+			// Spawn creature
+			Game.executeSpawnSpecial ( special );
+
+		} else {
+			let targets = Game.getTargetsOfSpecial( special );
+			for ( let target of targets ) {
+				if ( special.amount && special.amount instanceof Array && special.effect === "powers" ) {
+					// add to each power
+					target.addToElements( special.amount, true );
+
+				} else if ( typeof special.amount === "number" ) {
+					// direct property modification
+					let amount = special.amount
+					if ( special.effect === "hp" && amount < 0 ) {
+						// How do we know if it's nonPhysical ?  
+						let damage = special.amount * -1;
+						amount = Game.checkSpecialDefend ( target, damage, special.isNonPhysical );
+						amount *= -1;
+					}
+					target[special.effect] += amount;
+				} else if ( typeof special.amount === "string" ) {
+					// Elaborate string parsing...
+					let amount = Game.specialGetStringamountAmount( special );
+					if ( Game.specialGetStringAmountOperator( special ) === "=" ) {
+						target[special.effect] = amount;
+					} else {
+						if ( special.effect === "hp" && amount < 0 ) {
+							// How do we know if it's nonPhysical ?  
+							let damage = amount * -1;
+							amount = Game.checkSpecialDefend ( target, damage, special.isNonPhysical );
+							amount *= -1;
+						}
+						target[special.effect] += amount;	
+					}
+					
+				}
+			}
+		}
+		
+		if ( card.slot ) {
+			card.flex();	
+			Sounds.special.play();
+		}
+		
+	}
+
+
+
+	Game.executeSpawnSpecial = function ( special ) {
+		/*
+			Determine slots and spawn specified creatures into them
+		*/
+		console.log("Game.executeSpawnSpecial()" );
+		let targetSlots = [];
+		if ( special.target = "neighbor-slots" ){
+			// Find available slots
+			targetSlots = Game.getNeighborSlots( special.card.slot );
+		} else if ( special.target = "sibling-slots" ) {
+			targetSlots = Game.getSiblingSlots( special.card.slot );
+		}
+		targetSlots =  Game.getEmptySlots ( targetSlots );
+		arrayShuffle( targetSlots );
+		let numSpawns = Math.min ( special.amount, targetSlots.length );
+		for ( let i = 0; i < numSpawns; i++ ) {
+			// put spawn creature in available slot/s
+			let slot = targetSlots[ i ];
+			// spawn creature in that slot
+			console.log(special);
+			let creatureName = special.misc.spawn.type;
+			Game.spawnCard( creatureName, slot );
+		}
+		
+		/*
+		"event" : "summon",
+		"target" : "neighbor-slots",
+		"effect" : "spawn",
+		"amount" : 2,
+		"misc" : { "spawn" : { "type" : "Forest Spider" } }
+		*/
+	}
+
+
+	Game.checkSpecialDefend = function ( card, damage, isNonPhysical ) {
+		/*
+			Check for "defend-owner", "defend-sibling", "defend-neighbor" or "defend-self"
+			that defend this card or player.
+			Special modifies incoming damage. Return modified damage.
+		*/
+		console.log( "Game.checkDefendPhaseSpecials()");
+		isNonPhysical = isNonPhysical === true ? true : false;
+		let specials = [];
+		// If target is a Player, not a Card
+		if ( card instanceof Player ) {
+			let player = card;
+			// Check Player's cards 
+			let children = Game.getAllCardsInRack( player.rack );
+			for ( let child of children ) {
+				specials = specials.concat( Game.getCardSpecialsOfType( child, "defend-owner" ) );
+			}
+		} else if ( card instanceof Card ) {
+			// Check Self for "defend-self"
+			specials = Game.getCardSpecialsOfType( card, "defend-self");
+			let siblings = Game.getSiblings( card );
+			// Do Siblings defend me?
+			for ( let sibling of siblings ) {
+				specials = specials.concat( Game.getCardSpecialsOfType( sibling, "defend-sibling" ) );
+			}
+			// Do Neighbors defend me?
+			let neighbors = Game.getCardNeighbors( card );
+			for ( let neighbor of neighbors ) {
+				specials = specials.concat( Game.getCardSpecialsOfType( neighbor, "defend-neighbor") );
+			}
+		}
+
+		for ( let special of specials ) {
+			// Calculate damage modification
+			if ( special.effect === "nonphysical-percent" && isNonPhysical ) {
+				damage -= damage * special.amount;
+			} else if ( special.effect === "physical-percent" && !isNonPhysical ) {
+				damage -= damage * special.amount;
+			} else if ( special.effect === "nonphysical-number" && isNonPhysical ) {
+				damage -= special.amount;
+			} else if ( special.effect === "physical-number" && !isNonPhysical ) {
+				damage -= special.amount;
+			}
+		}
+		damage = Math.max( 0, Math.round(damage) );
+		return damage;
+	}
+
+
+/*
+								Game.applySpecialAmountToTarget = function ( special, target ) {
+									
+									//		Update target's property value
+									
+
+
+									if ( special.amount && special.amount instanceof Array && special.effect === "powers" ) {
+										// add to each power
+										target.addToElements( special.amount );
+									} else {
+										// determine amount and property
+										let amount = 0;
+										let property = null;
+
+										if ( typeof special.amount === "number" ) {
+											// does target have that property?
+											if ( target[special.effect] != undefined ) {
+												target[special.effect] += special.amount;
+											} else {
+												// special.effect Special Case
+												// eg. "defend"
+												// Ignore it here?
+											}
+											
+										} else if ( typeof special.amount === "string" ) {
+											// Elaborate string parsing...
+											
+											let resultantPropertyValue = Game.specialApplyStringamountOperator ( special, target );
+											// Apply Defense
+											let modifiedDamage = Game.checkSpecialDefend( target, damage, false );
+											target.takeDamage(modifiedDamage);
+										}	
+									}
+								}
+*/
+
+								Game.getDamageOfSpecial = function ( special ) {
+									/*
+										How much damage does this special do to its target/s?
+									*/
+									if ( special.event.substring(0,6) == "defend" ) {
+										return 0;
+									}
+									let amount = 0;
+									if ( special.effect === "hp" ) {
+										// Effect is damage 
+										if ( typeof special.amount === "number" ) {
+											amount = special.amount;
+										} else if ( typeof special.amount === "string" ) {
+											// Elaborate string parsing...
+											amount = Game.specialGetStringamountAmount( special );
+										}
+										// damage is expected as a positive amount,
+										// but stored as negative in special.amount
+										return amount * (-1);
+									}
+									/*
+									{
+										"event" : "cast",
+										"target" : "opponent",
+										"effect" : "hp",
+										"amount" : -6
+									}
+									*/
+								}
+
+	Game.executeCastPhaseSpecials = function ( card ) {
+		// Redundant?  All cards of type "spell" have special with event "cast", yes?
+		// Yes, but this collects all the specials.
+		let specials = [];
+		// Check Self for "cast"...
+		specials = specials.concat( Game.getCardSpecialsOfType( card, "cast" ) );
+		for ( let special of specials ) {
+			if ( special.effect === "hp" ) {
+				let damage = Game.getDamageOfSpecial( special );
+				if ( damage > 0 ) {
+					// If Damaging spell
+					Game.specialExecuteDamageSpell( special );
+				} else if ( damage < 0 ) {
+					// If Healing spell
+					Game.specialExecuteHealingSpell( special );
+				}
+					
+			} else if ( special.effect === "powers" ) {
+				let targets = Game.getTargetsOfSpecial( special );
+				for ( let target of targets ) {
+					target.addToElements( special.amount, true );	
+				}
+			}
+		}
+	}
+
+	Game.specialExecuteDamageSpell = function ( special ) {
+		console.log("Game.specialExecuteDamageSpell()");
+		// Determine Spell's target/s
 		let targets = [];
-		let owner = card.player;
+
+		// Get Targets
+		targets = Game.getTargetsOfSpecial( special );
+			
+		// Calculate Damage
+		let damage = Game.getDamageOfSpecial( special );
+		// Apply Damage Modifiers
+		let owner = special.card.owner;
+		let ownerCards = Game.getAllCardsInRack( owner.rack );
+		for ( let card of ownerCards ) {
+			// Calculate damage modification
+			let cardSpecials = Game.getCardSpecialsOfType( card, "owner-cast" );
+			for ( let cardSpecial of cardSpecials ) {
+				// If effect: "damage", 
+				if ( cardSpecial.effect === "damage" ) {
+					// Modify Damage
+					damage = Game.specialModifySpellDamage ( damage, cardSpecial );
+				}
+			}
+		}
+		
+		for ( let target of targets ) {
+			// Apply Damage to each Target
+			// Apply Damage Defense
+			let modDamage = Game.checkSpecialDefend ( target, damage, true );
+			target.takeDamage( modDamage );
+		}
+		
+	}
+
+
+	Game.specialExecuteHealingSpell = function ( special ) {
+
+		// Determine Spell's target/s
+		let targets = [];
+
+		// Get Targets
+		targets = Game.getTargetsOfSpecial( special );
+			
+		// Calculate Damage
+		let healing = Game.getDamageOfSpecial( special ) *-1;
+		// Are there such thing as Healing Modifiers ?
+		
+		
+		for ( let target of targets ) {
+			// Apply Healing to each Target
+			target.hp += healing;
+		}
+		
+	}
+
+	Game.specialModifySpellDamage = function ( damage, special ) {
+		// eg.
+		/*
+		"event" : "owner-cast",
+		"target" : "current-spell",
+		"effect" : "damage",
+		"amount" : "x|x|x|*:1.5",
+		*/
+		/*
+		"event" : "owner-cast",
+		"target" : "spell",
+		"effect" : "damage",
+		"amount" : 1
+		*/
+		// Effect is damage 
+		debugger;
+		if ( typeof special.amount === "number" ) {
+			damage += special.amount;
+		} else if ( typeof special.amount === "string" ) {
+			// Elaborate string parsing...
+			damage = Game.specialStringcodeModifyDamage( special, damage );
+		}
+		
+		return damage;
+	}
+
+								Game.executeSpellSpecial = function ( special ) {
+
+									// Get Targets
+									let targets = Game.getTargetsOfSpecial( special );
+									// Determine Spell's damage/healing
+
+									// Check Children for spell boosts
+
+									// Check Spell modifier Specials (all cards in play)
+
+									// Apply Spell effects to Targets
+
+								}
+	
+
+
+	Game.specialStringcodeModifyDamage = function ( special, damage ) {
+
+		
+		return Game.specialApplyStringamountModifier( special, damage );
+
+	}
+
+	Game.specialApplyStringamountModifier = function ( special, amount ) {
+		let string = special.amount;
+		let parts = string.split('|');
+		// modify amount?
+		let modifier = 0;
+		// Look for special symbols indicating modifier of result
+		// !! Once we get this crazy "string formula" 
+		//    system to work, the whole thing has
+		//    to be redesigned.
+		debugger;
+		for ( let part of parts ) {
+			let indicator = part.substring(0,2);
+			if ( indicator === "+:"
+			|| indicator === "-:"
+			|| indicator === "/:"
+			|| indicator === "*:"
+			|| indicator === "v:" ) {
+				// modifier = number
+				modifier = Number (part.substring(2));
+				switch ( indicator ) {
+					case "+:":
+						amount += modifier;
+						break;
+					case "-:":
+						amount -= modifier;
+						break;
+					case "/:":
+						amount /= modifier;
+						break;
+					case "*:":
+						amount *= modifier;
+						break;
+					case "v:":
+						amount = Math.min( amount, modifier );
+					default:
+						break;
+				}
+				break;
+			}
+		}
+		return amount;
+	}				
+
+	Game.specialGetStringamountAmount = function( special ) {
+		console.log("Game.specialGetStringamountAmount()");
+		/*
+			Decode amount from our tricky string special.amount formula,
+			and return it:
+		*/
+		// operator | ref | property [@ index] | modifier
+		// eg: - | owner | powers@0 | +:8
+		// means: subtract ( value of owner's powers[0] +8 )
+		// "amount" : "+|owner|powers@3|*:2"
+		let string = special.amount;
+		if ( string === "spell-table" ) {
+			return 0;
+		}
+		let card = special.card;
+		let parts = string.split('|');
+		let amount = 0;
+		
+		// source reference
+		let refString = parts[1]; 
+		let ref;  // ref is the source, not the target
+		switch ( refString ) {
+			case "owner":
+				ref = card.owner;
+				break;
+			case "opponent":
+				ref = Game.getOpponent( card.owner );
+				break;
+			case "self":
+				ref = card;
+				break;
+			case "across":
+				ref = Game.getCardAcross( card );
+				break;
+			case "target":
+				ref = special.targetCard;
+				break;
+			default: 
+				// ?
+				break;
+		}
+
+		// get amount via property key
+		let prop = parts[2];
+		
+		if ( prop.includes("@") ) {
+			// indicates prop element is array with index
+			prop_ar = prop.split('@');
+			prop = prop_ar[0];
+			index = Number(prop_ar[1]);
+			amount = ref[prop][index]; 
+		} else {
+			// 
+			amount = ref[prop];
+		}
+
+		amount = Game.specialApplyStringamountModifier( special, amount );
+		// Apply Stringamount Operator
+		let operator = parts[0];
+		switch ( operator ) {
+			case "-":
+				amount *= -1;
+				break;
+			case "+":
+			default:
+				amount = amount;
+		}
+
+		return amount;
+	}
+	Game.specialGetStringAmountOperator = function ( special ) {
+		let parts = special.amount.split('|');
+		return parts[0];
+	}
+
+
+/*
+	Game.specialApplyStringamountOperator = function ( special ) {
+		
+		
+			Return resultant property value (without updating the property),
+			after applying baseAmount (number),
+			using operation specified by special.amount (string)
+		
+
+		let baseAmount = Game.specialGetStringamountAmount( special );
+		let string = special.amount;
+		let parts = string.split('|');
+
+		// how to apply amount to property ( add, divide, etc )
+		operator = parts[0];
+		let propValue = target[special.effect];
+
+		switch ( operator ) {
+			// case "Math.min":
+			// 	propValue += amount; // Math.min was handled when getting amount
+			// 	break;
+			case "-":
+				baseAmount *= -1;
+				break;
+			// case "/":
+			// 	propValue /= amount;
+			// 	break;
+			// case "*":
+			// 	propValue *= amount;
+			// 	break;
+			// case "=":
+			// 	propValue = amount;
+			// 	break;
+			case "+":
+			default:
+				baseAmount = baseAmount;
+				break;
+		}
+		return baseAmount;
+
+	}
+*/
+
+
+	Game.cardHasSpecialOfType = function ( card, eventType ) {
+		for ( let special of card.specials ) {
+			if ( special.event === eventType ) {
+				return true;
+				break;
+			}
+		}
+		return false;
+	}
+
+	Game.getCardSpecialsOfType = function ( card, eventType ) {
+		console.log("Game.getCardSpecialsOfType( "+card.name+", "+eventType+")");
+		let specials = [];
+		for ( let special of card.specials ) {
+			// check if that special has correct event type
+			if ( special.event === eventType ) {
+				specials.push( special );
+			}
+		}
+		return specials;
+	}
+
+	Game.testSpecialConditional = function ( special ) {
+		/*
+			- helper function for Game.executeSpecial()
+			Check if special has conditional and wheter it's satisfied
+
+			// ref | property | comparison-operator | amount
+			// eg. "misc" : { "conditional" : "owner|powers@3|>=|5" }
+		*/
+
+		if ( special.misc && special.misc.conditional ) {
+			let card = special.card;
+			let cond = special.misc.conditional;
+			let propertyValue;
+			let parts = cond.split("|");
+			let ref = parts[0];
+			switch ( ref ) {
+				case "owner":
+					ref = card.owner;
+					break;
+				case "opponent":
+					ref = Game.getOpponent( card.owner );
+					break;
+				case "self":
+					ref = card;
+					break;
+				case "across":
+					ref = Game.getCardAcross( card );
+					break;
+					/*
+					//Assume no plural refs
+				case "neighbors":
+
+					break;
+				case "siblings":
+
+					break;
+				case "opponent-creatures":
+					*/
+					break;
+				default:
+
+			}
+
+			// get amount via property key
+			let prop = parts[1];
+			if ( prop.includes("@") ) {
+				// indicates prop element is array with index
+				prop_ar = prop.split('@');
+				prop = prop_ar[0];
+				index = Number(prop_ar[1]);
+				propertyValue = ref[prop][index];
+			} else {
+				// 
+				propertyValue = ref[prop];
+			}
+			// get amount for comparison
+			let amount = parts[3];
+			// get comparison operator
+			let operator = parts[2];
+			switch ( operator ) {
+				case ">":
+					return propertyValue > amount;
+					break;
+				case "<":
+					return propertyValue < amount;
+					break;
+				case ">=":
+					return propertyValue >= amount;
+					break;
+				case "<=":
+					return propertyValue <= amount;
+					break;
+				case "==":
+					return propertyValue == amount;
+					break;
+				default: 
+					return false;
+					// ?
+			}
+			
+		} else {
+			// No contidional, automatically satisfied
+			return true;
+		}
+		
+	}
+
+
+	Game.getTargetsOfSpecial = function ( special ) {
+		/*
+			Returns array of special's targets, determined by special's target string.
+		*/
+		let card = special.card;
+		console.log("Game.getTargetsOfSpecial( "+card.name+", "+special.event+" )");
+		if ( special.target instanceof Card ) {
+			// target has been defined as specific card
+			return [special.target];
+		} else if ( Game.specialWhichNeedsTarget === special ) {
+			return [special.targetCard];
+		}
+		let targets = [];
+		let owner = card.owner;
 		let opponent = owner === Game.activePlayer ? Game.passivePlayer : Game.activePlayer;
 		// find target(s)
-		console.log("special.target: "+special.target);
 		switch ( special.target ) {
+			case "all-creatures":
+				let allCreatures = Game.getAllCardsInRack( opponent.rack ).concat( Game.getAllCardsInRack( owner.rack, card ));
+				targets = targets.concat( allCreatures );
+				break;
 			case "owner":
 			// Get Game.activePlayer
 				targets.push(owner);
+				break;
+			case "neighbors":
+			// Cards to left/right of this card
+				targets = targets.concat( Game.getCardNeighbors( card ) );
+				break;
+			case "siblings":
+			// All cards in Owner's rack, except special's card
+				targets = targets.concat( Game.getAllCardsInRack( owner.rack, card ) );
+				break;
+			case "owner-creatures":
+			// All cards_data in Owner's rack
+				targets = targets.concat( Game.getAllCardsInRack( owner.rack ) );
 				break;
 			case "opponent":
 			// Get Game.passivePlayer
 				targets.push(opponent);
 				break;
-			case "owner-creatures":
-			// All cards_data in Owner's rack
-			console.log("owner: "+owner);
-				targets.push( Game.getAllCardsInRack( owner.rack, card ) );
-				break;
 			case "opponent-creatures":
 			// All cards_data in Opponent's rack
-				targets.push( Game.getAllCardsInRack( opponent.rack ) );
-				break;
-			case "neighbors":
-			// Cards to left/right of this card
-				targets.push( Game.getCardNeighbors( card ) );
+				targets = targets.concat( Game.getAllCardsInRack( opponent.rack ) );
 				break;
 			case "across":
 			// Card in same slot index of opponent's rack
@@ -2074,79 +3811,46 @@ let Game = (function(namespace){
 				break;
 			default:
 		}
+		if ( special.targetException ) {
+			for ( let t=targets.length-1; t >=0; t-- ) {
+				let target = targets[t];
+				if ( target.misc && target.misc[special.targetException] == true ) {
+					targets.splice(t,1);
+				}
+			}
+		}
+		for ( let target of targets ) {
+			let slotClause = target.slot != undefined ? ", slot "+target.slot.index : "";
+		}
+
 		return targets;
 	}
 
-	Game.getAllCardsInRack = function( rack, excludeCard ) {
-		let cards = [];
-		for ( let s = 0; s < rack.slots.length; s++ ) {
-			let card = rack.slots[s].card;
-			// if ( card instanceof Card && card != excludedCard ) {
-				cards.push( card );
-			// }
-		}
-		return cards;
-	}
+	/*
 
-	Game.getCardNeighbors = function ( card ) {
-		let cards = [];
-		// Get card's slot index
-		let index = card.slot.index;
-		if ( index > 0 ) {
-			// Get slot to left
-			let leftSlot = card.slot.rack.slots[ index -1 ];
-			if ( leftSlot.card != undefined ) {
-				cards.push( leftSlot.card );
-			}
-		}
-		if ( index < card.slot.rack.slots.length -1 ) {
-			// Check Slot to right
-			let rightSlot = card.slot.rack.slots[ card.slot.index + 1];
-			if ( rightSlot.card != undefined ) {
-				cards.push( rightSlot.card );
-			}
-		}
-		return cards;
-	}
+	Casting special events: 
+	"self-cast" - this spell card is played. 
+	"owner-cast" - another of my owner's spell cards (not this card) is played.
 
-	Game.getCardAcross = function ( card ) {
-		let index = card.slot.index;
-		let opponent = card.owner == Game.activePlayer ? Game.passivePlayer : Game.activePlayer;
-		return opponent.rack.slots[ index ].card;
-	}
+	When a spell is cast,
+	Check all cards (creatures in racks and spell played) for special.misc.spellDamageModifier,
+	Parse the value string, [0] is operation. [1] is amount. (eg. Dragon's special)
 
-	Game.isTimeForEvent = function ( eventType, card ) {
-		console.log("Game.isTimeForEvent( "+eventType+", "+card.name);
-		// Check if it is time to execute a card's special of eventType
-		let ownerTurn = card.player === Game.activePlayer;
-		let startPortion = Game.turnPhasePortion === "start";
-		switch ( eventType ) {
-			case "summon":
-				// If card's owner is activePlayer, turnphase is start, and card was played this turn
-				if ( ownerTurn && startPortion && card.turnPlayed === Game.turnNum ) {
-					return true;
-				}
-			case "owner-turn-start":
-				// if card's owner is activePlayer, and turnPhasePortion is "start"
-				if ( ownerTurn && startPortion ) {
-					return true;
-				}
-			case "owner-turn-end":
-				if ( ownerTurn && !startPortion ) {
-					return true;
-				}
-			case "opponent-turn-start":
-				if ( !ownerTurn && startPortion ) {
-					return true;
-				}
-			case "opponent-turn-end":
-				if ( !ownerTurn && !startPortion ) {
-					return true;
-				}
-			default: 
-				return false;
-		}
-	}
+	*/
+
+
+
+	// Game.getOwnerCardsSpecials = function ( owner ) {
+	// 	console.log("Game.getOwnerCardsSpecials()");
+	// 	// list owner's cards
+	// 	let ownerCards = Game.getAllCardsInRack( owner.rack );
+	// 	// for each card
+	// 	for ( let c = 0; c < ownerCards.length; c++ ) {
+	// 		let card = ownerCards[c];
+	// 		Game.getCardSpecialsOfType( card, eventType );
+	// 	}
+
+	// }
 
 
 	//				^ End Game Object ^												//
@@ -2160,6 +3864,20 @@ let Game = (function(namespace){
 
 
 
+/*
+	8888888b.          d8b          888                   .d888      8888888888          888                     
+	888   Y88b         Y8P          888                  d88P"       888                 888                     
+	888    888                      888                  888         888                 888                     
+	888   d88P .d88b.  888 88888b.  888888       .d88b.  888888      8888888    88888b.  888888 888d888 888  888 
+	8888888P" d88""88b 888 888 "88b 888         d88""88b 888         888        888 "88b 888    888P"   888  888 
+	888       888  888 888 888  888 888         888  888 888         888        888  888 888    888     888  888 
+	888       Y88..88P 888 888  888 Y88b.       Y88..88P 888         888        888  888 Y88b.  888     Y88b 888 
+	888        "Y88P"  888 888  888  "Y888       "Y88P"  888         8888888888 888  888  "Y888 888      "Y88888 
+	                                                                                                         888 
+	                                                                                                    Y8b d88P 
+	                                                                                                     "Y88P"  
+*/
+
 	// =====================================================================================
 	//
 	//
@@ -2169,9 +3887,10 @@ let Game = (function(namespace){
 	// =====================================================================================
 
 	Game.initGame();
-	Game.activePlayer = computerPlayer;
+	Sounds.initSounds();
+	// Game.activePlayer = computerPlayer;
 	// fillAIRack();
-	Game.startGame();
+	// Game.startGame();
 	
 
 
@@ -2186,7 +3905,7 @@ let Game = (function(namespace){
 	//
 	// =====================================================================================
 
-	
+
 	
 
 	function AISelectCard () {
@@ -2201,46 +3920,51 @@ let Game = (function(namespace){
 			cards = computerPlayer.deck.cards_ar.filter( card => !card.locked && card.type == "spell" );
 		}
 
-		// Of those, randomly pick one
-		// let card = cards[ Math.floor( Math.random()*cards.length ) ];
-		// Pick the most expensive
-		cards.sort( function(a,b) {
-			return b.cost - a.cost;
-		});
-		let card = cards[0];
-		console.log("card.cost: "+card.cost);
+		if ( cards.length > 0 ) {
+			// Of those, randomly pick one
+			// let card = cards[ Math.floor( Math.random()*cards.length ) ];
+			// Pick the most expensive
+			cards.sort( function(a,b) {
+				return b.cost - a.cost;
+			});
+			let card = cards[0];
+			console.log("card.cost: "+card.cost);
 
-		// Display Selected card until Human player acknowledges (clicks)
-		Game.selectCard( card );
-		AIShowSelectedCard( card );
+			// Display Selected card until Human player acknowledges (clicks)
+			Game.selectCard( card );
+			AIShowSelectedCard( card );
+		} else {
+			console.log("AI Can't afford a card");
+			Game.skipTurn();
+		}
+		
 	}
 	function AIShowSelectedCard () {
 		console.log("AIShowSelectedCard()");
 		let displayCard = Game.duplicateCard ( Game.selectedCard );
 		displayCard.undim();
+		displayCard.flip(true);
+		displayCard.flip();
 		// displayCard.el.style.transformOrigin = "top left";
 		// displayCard.shadow.style.transformOrigin = "top left";
 		// $(displayCard.el).css("transform","scale(2)");
 		// $(displayCard.shadow).css("transform","scale(2)");
-		let pos = $(AICardGrid).position();
-		console.log("pos: "+pos.left+", "+pos.top);
-		console.log("typeof pos.left: "+(typeof pos.left) );
+		// let pos = $(AICardGrid).position();
 		displayCard.x = 200;
-		displayCard.y = 50;
+		displayCard.y = 150;
 		// displayCard.width = cardWidth*2;
 		// displayCard.height = cardHeight*2;
 		console.log("displayCard.x: "+displayCard.x);
-		
-		
 
 		// When user clicks the card...
 		let evt = isTouch ? 'touchend' : 'click';
 		$(displayCard.el).on( evt, () => {
-			displayCard.kill();
-			AIPlayCard ();
+			
+			AIPlayCard ( );
+			displayCard.kill( true );
 			computerPlayer.deck.lock();
 			// Game.endPhase();
-			Game.resolveAttacks();
+			// Game.resolveAttacks();
 		} );
 		
 	}
@@ -2289,7 +4013,7 @@ let Game = (function(namespace){
 	}
 
 /*
-Game.checkCreatureEvents = function( turnPhase ) {
+Game.checkCreatureEvents = function( playerUp ) {
 
 			let ownerCreatures = [],
 				opponentCreatures = [];
@@ -2311,7 +4035,7 @@ Game.checkCreatureEvents = function( turnPhase ) {
 			let card = slot.card
 
 			// Check card for special events
-			if ( card.special != undefined && card.special.event == turnPhase ) {
+			if ( card.special != undefined && card.special.event == playerUp ) {
 				if ( card.damage > 0 ) {
 					switch (card.special.target) {
 						case "owner":
@@ -2398,7 +4122,67 @@ Game.checkCreatureEvents = function( turnPhase ) {
 		}
 		return a;
 	}
-	
+	/**
+	 * Randomly shuffle an array
+	 * https://stackoverflow.com/a/2450976/1293256
+	 * @param  {Array} array The array to shuffle
+	 * @return {String}      The first item in the shuffled array
+	 */
+	var arrayShuffle = function (array) {
+
+		var currentIndex = array.length;
+		var temporaryValue, randomIndex;
+
+		// While there remain elements to shuffle...
+		while (0 !== currentIndex) {
+			// Pick a remaining element...
+			randomIndex = Math.floor(Math.random() * currentIndex);
+			currentIndex -= 1;
+
+			// And swap it with the current element.
+			temporaryValue = array[currentIndex];
+			array[currentIndex] = array[randomIndex];
+			array[randomIndex] = temporaryValue;
+		}
+
+		return array;
+
+	};
+
+
+	function cloneObject(obj) {
+	    var copy;
+
+	    // Handle the 3 simple types, and null or undefined
+	    if (null == obj || "object" != typeof obj) return obj;
+
+	    // Handle Date
+	    if (obj instanceof Date) {
+	        copy = new Date();
+	        copy.setTime(obj.getTime());
+	        return copy;
+	    }
+
+	    // Handle Array
+	    if (obj instanceof Array) {
+	        copy = [];
+	        for (var i = 0, len = obj.length; i < len; i++) {
+	            copy[i] = cloneObject(obj[i]);
+	        }
+	        return copy;
+	    }
+
+	    // Handle Object
+	    if (obj instanceof Object) {
+	        copy = {};
+	        for (var attr in obj) {
+	            if (obj.hasOwnProperty(attr)) copy[attr] = cloneObject(obj[attr]);
+	        }
+	        return copy;
+	    }
+
+	    throw new Error("Unable to copy obj! Its type isn't supported.");
+	}
 
 
 

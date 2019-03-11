@@ -645,15 +645,13 @@ var cards_dataObj = { "elements" : [
 				"event" : "attack",
 				"target" : "opponent-creatures",
 				"effect" : "hp",
-				"amount" : "-|self|attack|+:0",
-				"isNonPhysical" : false
+				"amount" : "-|self|attack|+:0"
 			},
 			{
 				"event" : "attack",
 				"target" : "opponent",
 				"effect" : "hp",
-				"amount" : "-|self|attack|+:0",
-				"isNonPhysical" : false
+				"amount" : "-|self|attack|+:0"
 			}],
 			"description" : "Lightning Cloud's attack damages the opponent and each of the opponent's creatures."
 		},{
