@@ -12,6 +12,8 @@
 <script src="libs/jquery-2.1.0.js"></script>
 <script src="libs/TweenMax.min.js"></script>
 <script type="text/javascript" src="data/cards.json"></script>
+<script src="libs/howler.min.js"></script>
+
 
 <style>
 html, body {
@@ -135,7 +137,7 @@ body {
 }
 .card-back {
 	background-color: brown;
-	background-image: url('images/tcgplayer-logo-color_320x120.png'), url('images/bg-texture-300x300.jpg');
+	background-image: url('images/megaDoug_logo_hollow_rainbow.png'), url('images/bg-texture-300x300.jpg');
 	background-position: center 45%, center;
 	background-repeat: no-repeat, no-repeat;
 	background-size: 90% auto, cover;
@@ -424,12 +426,12 @@ body {
 	</div>
 </div>
 
-<audio id="attack-sound" src="sounds/scrape.wav" autoplay="false" ></audio>
+<!-- <audio id="attack-sound" src="sounds/scrape.wav" autoplay="false" ></audio> -->
 <!-- <audio id="spell-sound" src="sounds/spell.wav" autoplay="false" ></audio> -->
-<audio id="spell-sound">
+<!-- <audio id="spell-sound">
 	<source src="sounds/spell.wav" type="audio/wav" >
-</audio>
-<audio id="special-sound" src="sounds/special.wav" autoplay="false" ></audio>
+</audio> -->
+<!-- <audio id="special-sound" src="sounds/special.wav" autoplay="false" ></audio> -->
 <audio id="flip-sound" src="sounds/card-flip.wav" autoplay="false" ></audio>
 
 
@@ -483,17 +485,41 @@ let GameScope = (function(namespace){
 	$(cardDescriptionField).detach();
 	gameContainer.appendChild(cardDescriptionField);
 
+
+
+
+	//===========================================
+	//
+	//				SOUNDS
+	//
+	//===========================================
+
 	let Sounds = {};
 	Sounds.initSounds = function () {
-		Sounds.attack = document.getElementById("attack-sound");
-		Sounds.spell = document.getElementById("spell-sound");
-		Sounds.special = document.getElementById("special-sound");
-		Sounds.flip = document.getElementById("flip-sound");
+		console.log("initSounds()");
+		// Sounds.attack = document.getElementById("attack-sound");
+		// Sounds.spell = document.getElementById("spell-sound");
+		// Sounds.special = document.getElementById("special-sound");
+		// Sounds.flip = document.getElementById("flip-sound");
+		Sounds.attack = new Howl({
+		  src: ['sounds/scrape.wav']
+		});
+		Sounds.spell = new Howl({
+			src: ['sounds/spell.wav']
+		});
+		Sounds.special = new Howl({
+			src: ['sounds/special.wav']
+		});
+		Sounds.flip = new Howl({
+			src: ['sounds/card-flip.wav']
+		});
 	}
 
 	let startButton = document.getElementById("start-button");
 	startButton.addEventListener("click", function(e) {
-		Sounds.special.play();
+		// Sounds.special.play();
+		// Sounds.spell.src = "sounds/spell.wav";
+		Sounds.spell.play();
 		// document.getElementById("spell-sound").play();
 		document.getElementById("splash-screen").style.display = "none";
 		Game.startGame();
@@ -1558,7 +1584,7 @@ Y8b  d8 88   88 88 `88. 88  .8D
 			// Build deck of cards
 			// col = element-index, row = power (cost-range)
 			// TEMP FOR TESTING	v
-			let names = ["Minotaur Commander", "Giant Spider","Meditation","Ice Guard", "Nature’s Fury", "Call to Thunder", "Orc Chieftain", "Forest Sprite", "Tornado", "Master Healer", "Water Elemental", "Wall of Lightning"]; //"Hydra", "Inferno",
+			let names = ["Minotaur Commander", "Giant Spider","Meditation","Ice Guard", "Nature’s Fury", "Call to Thunder", "Orc Chieftain", "Forest Sprite", "Tornado", "Master Healer", "Water Elemental", "Wall of Lightning", "Armageddon", "Phoenix"]; //"Hydra", "Inferno",
 			let musts = [];
 			for ( let name of names ) {
 				musts.push( Game.makeCardByName( name ) );
@@ -2295,7 +2321,7 @@ d888888b db    db d8888b. d8b   db       .d8b.   .o88b. d888888b d888888b  .d88b
 	
 	Game.playSpellCard = function ( card ) {
 		console.log("Game.playSpellCard("+card.name+")");
-		
+		Game.chargePlayerForCard( card );
 		// If spell requires target card...
 		if ( Game.specialCheckTargetRequired( card ) ) {
 			// console.log("targetRequired?",Game.specialCheckTargetRequired( card ))
@@ -2318,7 +2344,6 @@ d888888b db    db d8888b. d8b   db       .d8b.   .o88b. d888888b d888888b  .d88b
 	Game.completePlaySpellCard = function ( card ) {
 		console.log("Game.completePlaySpellCard("+card.name+")");
 		Game.executeCastPhaseSpecials( card );
-		Game.chargePlayerForCard( card );
 		Sounds.spell.play();
 
 		// Is a player defeated?
@@ -3015,7 +3040,13 @@ db   8D 88      88.     Y8b  d8   .88.   88   88 88booo. db   8D
 			for ( let special of neighborSpecials_ar ) {
 				// neighbors with "summon-neighbor" event should target only this card (the one just summoned)
 				// NOT TRUE!  What if card with "summon-neighbor" has target "self" ?
-				special.target = card;
+				if ( card.misc && special.targetException && card.misc[special.targetException] == true ) {
+					// This card is special's exception
+					let index = neighborSpecials_ar.indexOf (special);
+					neighborSpecials_ar.splice(index,1);
+				} else {
+					special.target = card;	
+				}
 			}
 			specials = specials.concat( neighborSpecials_ar );
 
@@ -3027,8 +3058,15 @@ db   8D 88      88.     Y8b  d8   .88.   88   88 88booo. db   8D
 			let siblingSpecials_ar = Game.getCardSpecialsOfType( sibling, "summon-sibling" );
 			for ( let special of siblingSpecials_ar ) {
 				if ( special.effect === "attack" && typeof special.amount === "number" ) {
-					special.target = card;
 					// Attack booster (Minotaur Commander or Orc Chieftain)
+					
+					if ( card.misc && special.targetException && card.misc[special.targetException] == true ) {
+						// This card is special's exception
+						let index = siblingSpecials_ar.indexOf (special);
+						siblingSpecials_ar.splice(index,1);
+					} else {
+						special.target = card;	
+					}
 				} else {
 					special.target = Game.getTargetsOfSpecial( special )[0];
 					// Elemental
@@ -3446,7 +3484,7 @@ db   8D 88      88.     Y8b  d8   .88.   88   88 88booo. db   8D
 		"amount" : 1
 		*/
 		// Effect is damage 
-		debugger;
+
 		if ( typeof special.amount === "number" ) {
 			damage += special.amount;
 		} else if ( typeof special.amount === "string" ) {
@@ -3489,7 +3527,7 @@ db   8D 88      88.     Y8b  d8   .88.   88   88 88booo. db   8D
 		// !! Once we get this crazy "string formula" 
 		//    system to work, the whole thing has
 		//    to be redesigned.
-		debugger;
+		
 		for ( let part of parts ) {
 			let indicator = part.substring(0,2);
 			if ( indicator === "+:"
@@ -3811,6 +3849,8 @@ db   8D 88      88.     Y8b  d8   .88.   88   88 88booo. db   8D
 				break;
 			default:
 		}
+		debugger;
+
 		if ( special.targetException ) {
 			for ( let t=targets.length-1; t >=0; t-- ) {
 				let target = targets[t];
