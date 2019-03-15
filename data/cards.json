@@ -60,7 +60,8 @@ var cards_dataObj = { "elements" : [
 				"effect" : "powers",
 				"amount" : [1,0,0,0]				
 			}],
-			"description" : "Priest of Fire increases the growth of its owner's Fire power by 1."
+			"description" : "Priest of Fire increases the growth of its owner's Fire power by 1.",
+			"img" : "card-coffee-mug.jpg"
 		},
 		{
 			"name" : "Fire Drake",

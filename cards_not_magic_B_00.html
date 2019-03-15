@@ -24,7 +24,8 @@ html, body {
 }
 body {
 	background-image: url('images/bg-texture-stone.jpg');
-	
+	transform-origin: top left;
+	/*transform: scale( 0.5 );*/
 	/*background-image: url('images/white-marble-wallpaper-19.jpg');*/
 }
 #game-container {
@@ -33,7 +34,7 @@ body {
 	width: 100%;
 	height: 100%;
 	/*perspective-origin: 75% 25%;*/
-	transform-origin: 200px 100px;
+	transform-origin: 500px 100px;
 	transform-style: preserve-3d;
 	perspective: 1000px;
 	/*transform: scale( 0.85 );*/
@@ -78,10 +79,12 @@ body {
 }
 .player-field {
 	white-space: nowrap;
+	font-size: 1.5em;
 	}
 .player-hp-field {
 	font-family: sans-serif;
 	font-weight: bold;
+	font-size: 1.5em;
 }
 
 /* 
@@ -457,7 +460,8 @@ let GameScope = (function(namespace){
 	// let Game;
 
 
-
+	let scalePercent = 0.75;
+	document.body.style.transform = "scale( "+scalePercent+" )";
 	let isTouch = ("touchstart" in document.documentElement);
 	let cardWidth = 94,
 		cardHeight = 126,
@@ -1594,7 +1598,7 @@ Y8b  d8 88   88 88 `88. 88  .8D
 			// Build deck of cards
 			// col = element-index, row = power (cost-range)
 			// TEMP FOR TESTING	v
-			let names = ["Minotaur Commander", "Giant Spider","Meditation","Ice Guard", "Nature’s Fury", "Call to Thunder", "Orc Chieftain", "Forest Sprite", "Tornado", "Master Healer", "Water Elemental", "Wall of Lightning", "Armageddon", "Phoenix"]; //"Hydra", "Inferno",
+			let names = ["Minotaur Commander", "Giant Spider","Meditation","Ice Guard", "Nature’s Fury", "Call to Thunder", "Orc Chieftain", "Forest Sprite", "Tornado", "Master Healer", "Water Elemental", "Wall of Lightning", "Armageddon", "Phoenix", "Priest of Fire"]; //"Hydra", "Inferno",
 			let musts = [];
 			for ( let name of names ) {
 				musts.push( Game.makeCardByName( name ) );
@@ -2080,15 +2084,16 @@ d888888b db    db d8888b. d8b   db      d8888b.  .d8b.  d8888b. d888888b .d8888.
 		} else {
 			cards = livePlayer.deck.cards_ar.filter( card => !card.locked && card.type == "spell" );
 		}
-		if ( cards.length === 0 ) {
+		// if ( cards.length === 0 ) {
 			Game.showSkipButton();
-		}
+		// }
 		// Wait for Human to select card
 	}
 
 	Game.startAIPhase = function () {
 		console.log("Game.startAIPhase()");
 		
+		Game.hideSkipButton();
 		AISelectCard ();		
 	}
 
@@ -2639,11 +2644,36 @@ db    db d888888b d888888b db      d888888b d888888b d888888b d88888b .d8888.
 	}
 	Game.getElementCenterGlobal = function ( el ) {
 		// relative to gameContainer
+		debugger;
+
+/*
+		let gcRect = gameContainer.getBoundingClientRect();
+		let elRect = el.getBoundingClientRect();
+		elRect.left += Game.getElementWidth( el ) *0.5 - gcRect.left;
+		elRect.top += Game.getElementHeight( el ) *0.5 - gcRect.top;
+
+		return { x: elRect.left, y: elRect.top };
+		*/
+		
 		let gcOffset = $(gameContainer).offset();
 		let pos = $(el).offset();
-		pos.left += Game.getElementWidth( el )*0.5 - gcOffset.left;
-		pos.top += Game.getElementHeight( el )*0.5 - gcOffset.top;
-		return { x: pos.left, y: pos.top };
+
+		let pct = 1/scalePercent;
+		let posL = pos.left * pct;
+		let posT = pos.top * pct;
+		let gcL = gcOffset.left * pct;
+		let gcT = gcOffset.top * pct;
+
+		let x = posL + Game.getElementWidth( el ) * 0.5 - gcL;
+		let y = posT + Game.getElementHeight( el ) * 0.5 -gcT;
+
+		return { x : x, y : y };
+
+		// pos.left += Game.getElementWidth( el )*0.5 - gcOffset.left;
+		// pos.top += Game.getElementHeight( el )*0.5 - gcOffset.top;
+		
+		// return { x: pos.left, y: pos.top };
+		
 	}
 
 
@@ -4001,6 +4031,7 @@ db   8D 88      88.     Y8b  d8   .88.   88   88 88booo. db   8D
 		displayCard.undim();
 		displayCard.flip(true);
 		displayCard.flip();
+		displayCard.hilite();
 		// displayCard.el.style.transformOrigin = "top left";
 		// displayCard.shadow.style.transformOrigin = "top left";
 		// $(displayCard.el).css("transform","scale(2)");
