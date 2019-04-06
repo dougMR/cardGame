@@ -38,7 +38,7 @@ body {
 	transform-style: preserve-3d;
 	perspective: 1000px;
 	/*transform: scale( 0.85 );*/
-	top: 50px;
+	top: 20px;
 }
 #player-card-deck {
 	position: absolute;
@@ -395,7 +395,7 @@ body {
 	width: auto;
 	left: 10px; /*50%;*/
 	/*transform: translateX(-50%);*/
-	top: 175px;
+	top: 145px;
 }
 #splash-screen {
 	position: absolute;
@@ -416,6 +416,9 @@ body {
 	transform: translate(-50%, -50%);
 	border: 2px solid orange;
 	padding: 2em;
+}
+#resize-holder {
+	transform-origin: top left;
 }
 
 </style>
@@ -463,9 +466,26 @@ let GameScope = (function(namespace){
 	// Isolated namespace for all this code...
 
 
-	let scalePercent = 0.75;
-	// document.body.style.transform = "scale( "+scalePercent+" )";
-	document.getElementById("resize-holder").style.transform = "scale( "+scalePercent+" )";
+	let scalePercent = 1; // required at global scope, for use by dynamically positioned elements
+	function setScale ( decimal ) {
+		// console.log("setScale()");
+		if ( typeof decimal == "number" ) {
+			scalePercent = decimal;
+		} else {
+			const gameHeight = gameContainer.scrollHeight + gameContainer.offsetTop;
+			const windowHeight = $(window).height();
+			// console.log("scrollHeight: "+)
+			// console.log("gameHeight: "+gameHeight);
+			// console.log("windowHeight: "+windowHeight);
+			let pct = windowHeight / gameHeight;
+			scalePercent = pct.toFixed(2);
+			// console.log("pct: "+scalePercent);
+		}
+		
+		// document.body.style.transform = "scale( "+scalePercent+" )";
+		document.getElementById("resize-holder").style.transform = "scale( "+scalePercent+" )";
+	}
+	
 	let isTouch = ("touchstart" in document.documentElement);
 	let cardWidth = 94,
 		cardHeight = 126,
@@ -504,7 +524,7 @@ let GameScope = (function(namespace){
 	gameContainer.appendChild(cardDescriptionField);
 
 
-
+	
 
 	//===========================================
 	//
@@ -1960,10 +1980,10 @@ YP      Y88888P  `Y88P'  YP   YP    YP    Y888888P VP   V8P  Y888P       YP     
 		computerPlayer = new AIPlayer( "AI Character", "portrait-AI.jpg" );
 		computerPlayer.x = 70;
 		computerPlayer.y = topGap;
-		computerPlayer.setElement(0, -1);
-		computerPlayer.setElement(1, -1);
-		computerPlayer.setElement(2, -1);
-		computerPlayer.setElement(3, -1);
+		computerPlayer.setElement(0, 4);
+		computerPlayer.setElement(1, 4);
+		computerPlayer.setElement(2, 4);
+		computerPlayer.setElement(3, 4);
 		computerPlayer.deck.flipCards( true );
 		// console.log("computerPlayer.deck: "+computerPlayer.deck);
 		// computerPlayer.deck.removeEl();
@@ -2648,7 +2668,6 @@ db    db d888888b d888888b db      d888888b d888888b d888888b d88888b .d8888.
 	}
 	Game.getElementCenterGlobal = function ( el ) {
 		// relative to gameContainer
-		debugger;
 
 /*
 		let gcRect = gameContainer.getBoundingClientRect();
@@ -3899,7 +3918,6 @@ db   8D 88      88.     Y8b  d8   .88.   88   88 88booo. db   8D
 				break;
 			default:
 		}
-		debugger;
 
 		if ( special.targetException ) {
 			for ( let t=targets.length-1; t >=0; t-- ) {
@@ -3978,6 +3996,10 @@ db   8D 88      88.     Y8b  d8   .88.   88   88 88booo. db   8D
 
 	Game.initGame();
 	Sounds.initSounds();
+	// setTimeout(function(){
+		setScale();
+	// },5000);
+	// setScale();
 	// Game.activePlayer = computerPlayer;
 	// fillAIRack();
 	// Game.startGame();
