@@ -107,7 +107,7 @@ var cards_dataObj = { "elements" : [
 				"targetException" : "wall"
 			}],
 			"description" : "Orc Chieftain increases the attack of its neighboring creatures by 2 (except walls).",
-			"img" : "card-orc-chieftain.gif"
+			"img" : "card-coffee-pot.jpg"
 		},
 		{
 			"name" : "Flame Wave",

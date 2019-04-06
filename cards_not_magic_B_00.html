@@ -274,6 +274,7 @@ body {
 	box-shadow: inset 0 0 20px black;
 	transform-origin: top left;
 	transform: scale(0.6);
+	display: none	;
 }
 
 /* 
@@ -425,15 +426,19 @@ body {
 <!-- <img id="layout" src="images/gameplay_spectromancer.jpg" /> -->
 <!-- <div id="layout"></div> -->
 <!-- <div id="bg"></div> -->
-<img id="game-logo" src="images/game-logo.png" />
-<div id="ai-cards"></div>
-<div id="card-description"></div>
+
 
 <div id = "splash-screen">
 	<div id = "content" >OFFICE BATTLE
 		<br />
 		<button id="start-button">start</button>
 	</div>
+</div>
+<div id="resize-holder">
+	<img id="game-logo" src="images/game-logo.png" />
+	<div id="ai-cards"></div>
+	<div id="card-description"></div>
+	<div id="game-container"></div>
 </div>
 
 <!-- <audio id="attack-sound" src="sounds/scrape.wav" autoplay="false" ></audio> -->
@@ -457,17 +462,16 @@ Deck.changeCards() ? -->
 let GameScope = (function(namespace){
 	// Isolated namespace for all this code...
 
-	// let Game;
-
 
 	let scalePercent = 0.75;
-	document.body.style.transform = "scale( "+scalePercent+" )";
+	// document.body.style.transform = "scale( "+scalePercent+" )";
+	document.getElementById("resize-holder").style.transform = "scale( "+scalePercent+" )";
 	let isTouch = ("touchstart" in document.documentElement);
 	let cardWidth = 94,
 		cardHeight = 126,
-		gameContainer = document.createElement("div");
-	gameContainer.id = "game-container";
-	document.body.appendChild(gameContainer);
+		gameContainer = document.getElementById("game-container");//document.createElement("div");
+	// gameContainer.id = "game-container";
+	// document.body.appendChild(gameContainer);
 
 	let playerCardGrid = document.createElement("div");
 	playerCardGrid.id = "player-card-deck";
@@ -1956,10 +1960,10 @@ YP      Y88888P  `Y88P'  YP   YP    YP    Y888888P VP   V8P  Y888P       YP     
 		computerPlayer = new AIPlayer( "AI Character", "portrait-AI.jpg" );
 		computerPlayer.x = 70;
 		computerPlayer.y = topGap;
-		computerPlayer.setElement(0, 4);
-		computerPlayer.setElement(1, 4);
-		computerPlayer.setElement(2, 4);
-		computerPlayer.setElement(3, 4);
+		computerPlayer.setElement(0, -1);
+		computerPlayer.setElement(1, -1);
+		computerPlayer.setElement(2, -1);
+		computerPlayer.setElement(3, -1);
 		computerPlayer.deck.flipCards( true );
 		// console.log("computerPlayer.deck: "+computerPlayer.deck);
 		// computerPlayer.deck.removeEl();
